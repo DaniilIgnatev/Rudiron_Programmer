@@ -1,30 +1,24 @@
 #include "hexflashparser.hpp"
 
 HexFlashParser::HexFlashParser(QObject *parent)
-    : HEXParser{parent}
+    : HEXParser{0x20000, parent}
 {
 
 }
 
 BOOL HexFlashParser::initialize(void)
 {
-    size_t i;
+    int i;
     int nb;
     QFile file(hexFilePath);
     char chd;
     DWORD	dwadr;
-    /*
-    for(i=0;i<sizeof(bufcod);i++)
-    {
-        bufcod[i] = i;
-    }
-    ilcod = 512*0x100;
-    return 1;
-*/
+
     dwadr_seg_hex = 0;
     dwadr_lineoffs_hex = 0;
-    for (i = 0; i < sizeof(bufcod); i++){
-        bufcod[i] = 0xff;
+
+    for (int i = 0; i < programm_buffer.size(); i++){
+        programm_buffer[i] = 0xff;
     }
 
     if (!file.open(QIODevice::ReadWrite)){
@@ -44,14 +38,14 @@ BOOL HexFlashParser::initialize(void)
         if (nb != 1){
             file.close();
 
-            for (i = (sizeof(bufcod) - 1); i >= 0; i--){
-                if (bufcod[i] != 0xff){
+            for (i = (programm_buffer.size() - 1); i >= 0; i--){
+                if ((unsigned char)programm_buffer.at(i) != 0xff){
                     break;
                 }
             }
 
             i = ((i + 0x100) & 0xffffff00);
-            ilcod = i;
+            programm_il = i;
             return 1;
         }
 
@@ -69,7 +63,7 @@ BOOL HexFlashParser::initialize(void)
 
             dwadr -= 0x08000000;
             for (i = 0;i < bl_hex; i++){
-                bufcod[dwadr+i] = buf_data_hex[i];
+                programm_buffer[(int)dwadr + i] = buf_data_hex[i];
             }
         }
     }

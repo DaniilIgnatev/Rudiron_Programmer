@@ -32,25 +32,34 @@ public:
 
 public:
 
+    virtual BOOL initialize(void);
+
     BOOL GetDataHex(void);
 
     BYTE GetHexByte(size_t ibuf);
 
 protected:
     ///Адрес начала загружаемого массива байт
-    size_t dwadrboot;
+    size_t programm_dwadr;
 
     ///Размер загружаемого массива байт
-    size_t ilboot;
+    size_t programm_il;
 
     ///Размер адресного пространства
-    size_t buf_programm_size;
+    size_t programm_buffer_size;
 
     ///Адресное пространство
-    QByteArray bufram;
+    QByteArray programm_buffer;
 
 public:
-    virtual BOOL initialize(void);
+
+    size_t getProgramm_dwadr() const;
+
+    size_t getProgramm_il() const;
+
+    size_t getProgramm_buffer_size() const;
+
+    const QByteArray &getProgramm_buffer() const;
 
 signals:
 

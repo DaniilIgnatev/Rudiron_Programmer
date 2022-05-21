@@ -3,8 +3,8 @@
 HEXParser::HEXParser(size_t buf_programm_size, QObject *parent)
     : QObject{parent}
 {
-    this->buf_programm_size = buf_programm_size;
-    this->bufram.resize(this->buf_programm_size);
+    this->programm_buffer_size = buf_programm_size;
+    this->programm_buffer.resize(this->programm_buffer_size);
 }
 
 const QString &HEXParser::getHexFilePath() const
@@ -69,4 +69,24 @@ BYTE HEXParser::GetHexByte(size_t ibuf)
     }
 
     return bh + bl;
+}
+
+const QByteArray &HEXParser::getProgramm_buffer() const
+{
+    return programm_buffer;
+}
+
+size_t HEXParser::getProgramm_buffer_size() const
+{
+    return programm_buffer_size;
+}
+
+size_t HEXParser::getProgramm_il() const
+{
+    return programm_il;
+}
+
+size_t HEXParser::getProgramm_dwadr() const
+{
+    return programm_dwadr;
 }

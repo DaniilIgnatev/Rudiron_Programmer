@@ -72,11 +72,11 @@ void UART::write(char byte)
     QThread::currentThread()->msleep(1);
 }
 
-void UART::write(char *buffer, int size)
+void UART::write(QByteArray buffer)
 {
-    for (int i = 0; i < size; i++){
-        this->write(buffer[i]);
-    }
+    serial->write(buffer);
+    serial->waitForBytesWritten();
+    QThread::currentThread()->msleep(1);
 }
 
 int UART::readByte()

@@ -32,6 +32,8 @@ public:
 
     void write(char byte);
 
+    void write(QByteArray buffer);
+
     void write(char* buffer, int size);
 
     int readByte();
