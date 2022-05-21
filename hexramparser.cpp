@@ -1,18 +1,18 @@
 #include "hexramparser.hpp"
 
 HEXRAMParser::HEXRAMParser(QObject *parent)
-    : HEXParser{parent}
+    : HEXParser{0x8000, parent}
 {
 
 }
 
-BOOL HEXRAMParser::GetBootCod(void)
+BOOL HEXRAMParser::initialize(void)
 {
     DWORD	dwadr;
     dwadr_seg_hex = 0;
     dwadr_lineoffs_hex = 0;
 
-    for (size_t i = 0; i < sizeof(bufram); i++){
+    for (int i = 0; i < bufram.size(); i++){
         bufram[i] = 0xff;
     }
 
@@ -23,7 +23,7 @@ BOOL HEXRAMParser::GetBootCod(void)
     char chd;
 
     while (nb == 1){
-        size_t i = 0;
+        int i = 0;
         do{
             nb = file.read(&chd, 1);
             buf_hexstr[i] = chd;
@@ -34,14 +34,14 @@ BOOL HEXRAMParser::GetBootCod(void)
         if (nb != 1){
             file.close();
 
-            for (i = 0; i < sizeof(bufram); i++){
-                if(bufram[i] != 0xff)
+            for (i = 0; i < bufram.size(); i++){
+                if((unsigned char)bufram.at(i) != 0xff)
                     break;
             }
 
             dwadrboot = i;
             for (i = (sizeof(bufram) - 1); i >= 0; i--){
-                if(bufram[i] != 0xff)
+                if((unsigned char)bufram.at(i) != 0xff)
                     break;
             }
 
@@ -63,7 +63,7 @@ BOOL HEXRAMParser::GetBootCod(void)
 
             dwadr -= 0x20000000;
             for (i = 0; i < bl_hex; i++){
-                bufram[dwadr + i] = buf_data_hex[i];
+                bufram[(int)dwadr + i] = buf_data_hex[i];
             }
         }
     }

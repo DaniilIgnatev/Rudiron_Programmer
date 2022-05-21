@@ -3,11 +3,13 @@
 Programmer::Programmer(QObject *parent)
     : QObject{parent}
 {
-
+    txdbuf.resize(txdbuf_size);
 }
 
 void Programmer::start()
 {
+    ramParser.setHexFilePath(QDir::currentPath() + "\\1986_BOOT_UART.HEX");
+
     static const QString EXCHANGE_ERROR = "Ошибка обмена";
 
     if (!uart.begin("COM8")){

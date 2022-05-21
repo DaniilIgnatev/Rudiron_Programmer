@@ -4,19 +4,17 @@
 #include <QObject>
 #include "TypeDefs.hpp"
 
-
 class HEXParser : public QObject
 {
     Q_OBJECT
-private:
-
-    BYTE bufcod[0x20000];
-
-    size_t ilcod;
+public:
+    explicit HEXParser(size_t buf_programm_size, QObject *parent = nullptr);
 
 protected:
 
-    QString hexFilePath;
+    BYTE buf_hexstr[530];
+
+    BYTE btype_hex;
 
     BYTE bl_hex;
 
@@ -26,22 +24,33 @@ protected:
 
     DWORD dwadr_seg_hex, dwadr_lineoffs_hex;
 
-    BYTE buf_hexstr[530];
-
-    BYTE btype_hex;
+protected:
+    QString hexFilePath;
+public:
+    const QString &getHexFilePath() const;
+    void setHexFilePath(const QString &newHexFilePath);
 
 public:
-
-    explicit HEXParser(QObject *parent = nullptr);
-
-    BOOL GetHexCod(QString strfn);
 
     BOOL GetDataHex(void);
 
     BYTE GetHexByte(size_t ibuf);
 
-    const QString &getHexFilePath() const;
-    void setHexFilePath(const QString &newHexFilePath);
+protected:
+    ///Адрес начала загружаемого массива байт
+    size_t dwadrboot;
+
+    ///Размер загружаемого массива байт
+    size_t ilboot;
+
+    ///Размер адресного пространства
+    size_t buf_programm_size;
+
+    ///Адресное пространство
+    QByteArray bufram;
+
+public:
+    virtual BOOL initialize(void);
 
 signals:
 

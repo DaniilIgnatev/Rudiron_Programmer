@@ -1,10 +1,13 @@
 #ifndef TYPEDEFS_HPP
 #define TYPEDEFS_HPP
 
-#include <QDir>
 #include <QString>
+#include <QByteArray>
+
+#include <QDir>
 #include <QFile>
 #include <QIODevice>
+
 
 #define CONST               const
 
