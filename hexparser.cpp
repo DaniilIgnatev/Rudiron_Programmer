@@ -1,6 +1,6 @@
 #include "hexparser.hpp"
 
-HEXParser::HEXParser(size_t buf_programm_size, QObject *parent)
+HEXParser::HEXParser(int buf_programm_size, QObject *parent)
     : QObject{parent}
 {
     this->programm_buffer_size = buf_programm_size;
@@ -12,7 +12,7 @@ const QString &HEXParser::getHexFilePath() const
     return hexFilePath;
 }
 
-void HEXParser::setHexFilePath(const QString &newHexFilePath)
+void HEXParser::setHexPath(const QString &newHexFilePath)
 {
     hexFilePath = newHexFilePath;
 }

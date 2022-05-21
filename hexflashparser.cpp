@@ -18,7 +18,7 @@ BOOL HexFlashParser::initialize(void)
     dwadr_lineoffs_hex = 0;
 
     for (int i = 0; i < programm_buffer.size(); i++){
-        programm_buffer[i] = 0xff;
+        programm_buffer[i] = (unsigned char)0xff;
     }
 
     if (!file.open(QIODevice::ReadWrite)){

@@ -19,12 +19,10 @@ private:
     QString bootloader_path = "C:/Users/daniil/YandexDisk/Documents/Rudiron/Distributive/components/win_x64/RudironDistributive/tools/UART programmer/1986UARTWSD/1986_BOOT_UART.hex";
     QString programm_path = "C:/Users/daniil/YandexDisk/Documents/Rudiron/Distributive/components/win_x64/RudironDistributive/tools/UART programmer/1986UARTWSD/RudironDiagnostics.hex";
 
-    static const int txdbuf_size = 512;
-    QByteArray txdbuf;
-    void clearTXDBuf();
-
     HEXRAMParser ramParser;
     HexFlashParser flashParser;
+
+    QByteArray txdbuf;
 
 public:
     explicit Programmer(QObject *parent = nullptr);

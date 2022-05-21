@@ -8,7 +8,7 @@ class HEXParser : public QObject
 {
     Q_OBJECT
 public:
-    explicit HEXParser(size_t buf_programm_size, QObject *parent = nullptr);
+    explicit HEXParser(int buf_programm_size, QObject *parent = nullptr);
 
 protected:
 
@@ -28,11 +28,11 @@ protected:
     QString hexFilePath;
 public:
     const QString &getHexFilePath() const;
-    void setHexFilePath(const QString &newHexFilePath);
+    void setHexPath(const QString &newHexFilePath);
 
 public:
 
-    virtual BOOL initialize(void);
+    virtual BOOL initialize(void) = 0;
 
     BOOL GetDataHex(void);
 

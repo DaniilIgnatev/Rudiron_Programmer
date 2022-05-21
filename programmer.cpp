@@ -3,13 +3,15 @@
 Programmer::Programmer(QObject *parent)
     : QObject{parent}
 {
-    txdbuf.resize(txdbuf_size);
+    ramParser.setHexPath(this->bootloader_path);
+    ramParser.initialize();
+
+    flashParser.setHexPath(this->programm_path);
+    flashParser.initialize();
 }
 
 void Programmer::start()
 {
-    ramParser.setHexFilePath(QDir::currentPath() + "\\1986_BOOT_UART.HEX");
-
     static const QString EXCHANGE_ERROR = "Ошибка обмена";
 
     if (!uart.begin("COM8")){
@@ -37,33 +39,36 @@ void Programmer::start()
     qDebug() << "Синхронизация...ОК!";
 
     qDebug() << "Начал загрузку бутлодера...";
+
+    int a = ramParser.getProgramm_il();
+
+    txdbuf.resize(9);
     txdbuf[0] = 'L';
-    txdbuf[1] = (dwadrboot & 0xff);
-    txdbuf[2] = (dwadrboot>>8) & 0xff;
+    txdbuf[1] = (ramParser.getProgramm_dwadr() & 0xff);
+    txdbuf[2] = (ramParser.getProgramm_dwadr() >> 8) & 0xff;
     txdbuf[3] = 0;
     txdbuf[4] = 0x20;
-    txdbuf[5] = ilboot & 0xff;
-    txdbuf[6] = (ilboot>>8) & 0xff;
+    txdbuf[5] = ramParser.getProgramm_il() & 0xff;
+    txdbuf[6] = (ramParser.getProgramm_il() >> 8) & 0xff;
     txdbuf[7] = 0;
     txdbuf[8] = 0;
-    uart.write(txdbuf,9);
-    clearTXDBuf();
+    uart.write(txdbuf);
 
-    if	(uart.getByte(0) != 'L')
-    {
-        qDebug() << EXCHANGE_ERROR;
-        uart.end();
-        return;
-    }
+//    if	(uart.getByte(0) != 'L')
+//    {
+//        qDebug() << EXCHANGE_ERROR;
+//        uart.end();
+//        return;
+//    }
 
-    uart.write((LPSTR)(bufram+dwadrboot),ilboot);
-    if	((!com.ReadBlock(rxdbuf,1, true))||(rxdbuf[0]!='K'))
-    {
-        str = "ошибка обмена";
-        InsertStrToList();
-        com.Close();
-        return;
-    }
+//    uart.write((LPSTR)(bufram+dwadrboot),ilboot);
+//    if	((!com.ReadBlock(rxdbuf,1, true))||(rxdbuf[0]!='K'))
+//    {
+//        str = "ошибка обмена";
+//        InsertStrToList();
+//        com.Close();
+//        return;
+//    }
 
 //	for(i=0;i<(ilboot>>3);i++)
 //	{
@@ -170,17 +175,6 @@ void Programmer::start()
 //	}
 //	com.Close();
 
-}
-
-void Programmer::clearTXDBuf()
-{
-    for (int i = 0; i < txdbuf_size; i++){
-        if (txdbuf[i] == 0){
-            break;
-        }
-
-        txdbuf[i] = 0;
-    }
 }
 
 //BOOL Programmer::Program(void)
