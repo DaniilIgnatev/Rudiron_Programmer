@@ -45,4 +45,6 @@ typedef CONST CHAR *PCZZSTR;
 typedef  CHAR *PNZCH;
 typedef  CONST CHAR *PCNZCH;
 
+#define BYTE_MAX (unsigned char)0xff
+
 #endif // TYPEDEFS_HPP
