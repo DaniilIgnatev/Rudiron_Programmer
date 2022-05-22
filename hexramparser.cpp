@@ -12,7 +12,7 @@ BOOL HEXRAMParser::initialize(void)
     dwadr_seg_hex = 0;
     dwadr_lineoffs_hex = 0;
 
-    for (size_t i = 0; i < programm_buffer_size; i++){
+    for (int i = 0; i < programm_buffer_size; i++){
         programm_buffer[(int)i] = BYTE_MAX;
     }
 
@@ -23,7 +23,7 @@ BOOL HEXRAMParser::initialize(void)
     char chd;
 
     while (nb == 1){
-        size_t i = 0;
+        int i = 0;
         do{
             nb = file.read(&chd, 1);
             buf_hexstr[i] = chd;

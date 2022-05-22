@@ -33,13 +33,15 @@ private:
 
     void sync();
 
-    void flashBootloader();
+    bool flashBootloader();
 
-    void flashBootloader_sync();
+    bool flashBootloader_sync();
 
-    void flashBootloader_load();
+    bool flashBootloader_load();
 
-    void flashBootloader_verify();
+    bool flashBootloader_verify();
+
+    bool flashBootloader_run();
 
     BOOL Program(void);
 

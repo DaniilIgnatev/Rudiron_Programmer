@@ -66,7 +66,7 @@ void UART::end()
 }
 
 void UART::errorSlot(QSerialPort::SerialPortError error){
-    if (error != QSerialPort::NoError){
+    if (error != QSerialPort::NoError && error != QSerialPort::TimeoutError){
         QMetaEnum metaEnum = QMetaEnum::fromType<QSerialPort::SerialPortError>();
         QString error_str = metaEnum.valueToKey(error);
         qDebug() << "Serial error: " << error_str;
@@ -81,16 +81,10 @@ void UART::write(char byte)
     QThread::currentThread()->msleep(1);
 }
 
-void UART::write(QByteArray buffer)
+void UART::write(QByteArray buffer, int timeout)
 {
     serial->write(buffer);
-    serial->waitForReadyRead(2000);
-
-//    for (auto byte: buffer){
-//        serial->write(QByteArray(1, byte));
-//        serial->waitForBytesWritten();
-//        QThread::currentThread()->msleep(5);
-//    }
+    serial->waitForReadyRead(timeout);
 }
 
 int UART::readByte()

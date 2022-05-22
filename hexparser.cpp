@@ -85,17 +85,17 @@ const QByteArray &HEXParser::getProgramm_buffer() const
     return programm_buffer;
 }
 
-size_t HEXParser::getProgramm_buffer_size() const
+int HEXParser::getProgramm_buffer_size() const
 {
     return programm_buffer_size;
 }
 
-size_t HEXParser::getProgramm_il() const
+int HEXParser::getProgramm_il() const
 {
     return programm_il;
 }
 
-size_t HEXParser::getProgramm_dwadr() const
+int HEXParser::getProgramm_dwadr() const
 {
     return programm_dwadr;
 }
