@@ -4,7 +4,7 @@ HEXParser::HEXParser(int buf_programm_size, QObject *parent)
     : QObject{parent}
 {
     this->programm_buffer_size = buf_programm_size;
-    this->programm_buffer.resize(this->programm_buffer_size);
+    this->programm_buffer.resize((int)programm_buffer_size);
 }
 
 const QString &HEXParser::getHexFilePath() const
@@ -69,6 +69,15 @@ BYTE HEXParser::GetHexByte(size_t ibuf)
     }
 
     return bh + bl;
+}
+
+QByteArray HEXParser::getOccupiedProgrammBuffer()
+{
+   int dwadr = (int)getProgramm_dwadr();
+   int il = (int)getProgramm_il();
+
+   QByteArray mid = getProgramm_buffer().mid(dwadr, il);
+   return mid;
 }
 
 const QByteArray &HEXParser::getProgramm_buffer() const

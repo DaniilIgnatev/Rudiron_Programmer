@@ -17,6 +17,7 @@ private:
 
     unsigned char rx_buffer[rx_buffer_size] = {0};
 
+    ///Индекс последнего свободного байта в буфере приема
     unsigned char rx_buffer_index = 0;
 
 public:
@@ -26,7 +27,7 @@ public:
 
     int count();
 
-    bool begin(QString name);
+    bool begin(QSerialPortInfo port);
 
     void end();
 
@@ -39,6 +40,11 @@ public:
     int readByte();
 
     int popByte();
+
+    void waitRead(int timeout = 100);
+
+    ///Очищает буфер приема
+    void clearRXBuffer();
 
 signals:
 

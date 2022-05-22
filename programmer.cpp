@@ -12,18 +12,105 @@ Programmer::Programmer(QObject *parent)
 
 void Programmer::start()
 {
-    static const QString EXCHANGE_ERROR = "Ошибка обмена";
-
-    if (!uart.begin("COM8")){
-        qDebug() << "Ошибка открытия COM порта...";
-        return;
+    auto ports = QSerialPortInfo::availablePorts();
+    for (auto &p: ports){
+        if (p.productIdentifier() == 60000){
+            if (!uart.begin(p)){
+                qDebug() << "Ошибка открытия COM порта...";
+                return;
+            }
+            break;
+        }
     }
 
+    this->flashBootloader();
+
+    //	txdbuf[0] = 'R';
+    //	txdbuf[1] = dwadrboot & 0xff;
+    //	txdbuf[2] = (dwadrboot>>8) & 0xff;
+    //	txdbuf[3] = 0;
+    //	txdbuf[4] = 0x20;
+    //	com.WriteBlock(txdbuf,5);
+    //	Sleep(1);
+
+    //	if	((!com.ReadBlock(rxdbuf,1, true))||(rxdbuf[0]!='R'))
+    //	{
+    //		str = "ошибка обмена";
+    //		InsertStrToList();
+    //		com.Close();
+    //		return;
+    //	}
+    //	txdbuf[0] = 'I';
+    //	com.WriteBlock(txdbuf,1);
+    //	f = TRUE;
+    //	Sleep(1);
+
+    //	if(com.ReadBlock(rxdbuf,12, true))
+    //	{
+    //		for(j=0;j<12;j++)
+    //			{
+    //				if(rxdbuf[j] != id_str[j])
+    //					f= FALSE;
+    //			}
+    //	}
+    //	else
+    //		f = FALSE;
+    //	if(!f)
+    //	{
+    //		str = "ошибка идентификации загрузчика!";
+    //		InsertStrToList();
+    //		com.Close();
+    //		return;
+    //	}
+    //	m_list.DeleteString(m_list.GetCount()-1);
+    //	str = "boot load...ОК!";
+    //	InsertStrToList();
+
+    //	if(m_erase.GetCheck()==BST_CHECKED)
+    //		if(!Erase())
+    //			return;
+    //	if(m_program.GetCheck()==BST_CHECKED)
+    //		if(!Program())
+    //			return;
+    //	if(m_verify.GetCheck()==BST_CHECKED)
+    //		if(!Verify())
+    //			return;
+    //	if(fStartRun)
+    //	{
+    //		str = "Run at 0x08000000...";
+    //		InsertStrToList();
+    //		txdbuf[0] = 'R';
+    //		com.WriteBlock(txdbuf,1);
+    //		Sleep(1);
+
+    //		if	((!com.ReadBlock(rxdbuf,1, true))||(rxdbuf[0]!='R'))
+    //		{
+    //			str = "ошибка обмена";
+    //			InsertStrToList();
+    //		}
+    //		else
+    //		{
+    //			m_list.DeleteString(m_list.GetCount()-1);
+    //			str = "Run at 0x08000000 OK!";
+    //			InsertStrToList();
+    //		}
+    //	}
+    //	com.Close();
+
+}
+
+void Programmer::flashBootloader()
+{
+    flashBootloader_sync();
+    flashBootloader_load();
+}
+
+void Programmer::flashBootloader_sync()
+{
     qDebug() << "Синхронизация...";
 
     for(int i = 0; i < 512; i++){
         uart.write(0x0);
-        uart.readByte();
 
         if (uart.getByte(0) == 0x0D && uart.getByte(1) == 0x0A && uart.getByte(2) == 0x3E) {
             break;
@@ -37,11 +124,12 @@ void Programmer::start()
     }
 
     qDebug() << "Синхронизация...ОК!";
+    uart.clearRXBuffer();
+}
 
+void Programmer::flashBootloader_load()
+{
     qDebug() << "Начал загрузку бутлодера...";
-
-    int a = ramParser.getProgramm_il();
-
     txdbuf.resize(9);
     txdbuf[0] = 'L';
     txdbuf[1] = (ramParser.getProgramm_dwadr() & 0xff);
@@ -54,127 +142,59 @@ void Programmer::start()
     txdbuf[8] = 0;
     uart.write(txdbuf);
 
-//    if	(uart.getByte(0) != 'L')
+    if	(uart.getByte(0) != 'L')
+    {
+        qDebug() << "Ошибка загрузки бутлодера в начале!";
+        uart.end();
+        return;
+    }
+    uart.clearRXBuffer();
+
+    uart.write(ramParser.getOccupiedProgrammBuffer());
+    if	(uart.getByte(0) !='K')
+    {
+        qDebug() << "Ошибка загрузки бутлодера в конце!";
+        uart.end();
+        return;
+    }
+    uart.clearRXBuffer();
+}
+
+void Programmer::flashBootloader_verify()
+{
+//    for(int i = 0; i < (ilboot >> 3); i++)
 //    {
-//        qDebug() << EXCHANGE_ERROR;
-//        uart.end();
-//        return;
+//        txdbuf[0] = 'Y';
+//        txdbuf[1] = (dwadrboot+8*i) & 0xff;
+//        txdbuf[2] = ((dwadrboot+8*i)>>8) & 0xff;
+//        txdbuf[3] = 0;
+//        txdbuf[4] = 0x20;
+//        txdbuf[5] = 8;
+//        txdbuf[6] = 0;
+//        txdbuf[7] = 0;
+//        txdbuf[8] = 0;
+//        com.WriteBlock(txdbuf,9);
+//        f = TRUE;
+//        Sleep(1);
+
+//        if((com.ReadBlock(rxdbuf,10, true))&&(rxdbuf[0]=='Y')&&(rxdbuf[9]=='K'))
+//        {
+//            for(j=0;j<8;j++)
+//            {
+//                if(rxdbuf[j+1] != (char)bufram[dwadrboot+8*i+j])
+//                    f= FALSE;
+//            }
+//        }
+//        else
+//            f= FALSE;
+//        if(!f)
+//        {
+//            str = "ошибка обмена";
+//            InsertStrToList();
+//            com.Close();
+//            return;
+//        }
 //    }
-
-//    uart.write((LPSTR)(bufram+dwadrboot),ilboot);
-//    if	((!com.ReadBlock(rxdbuf,1, true))||(rxdbuf[0]!='K'))
-//    {
-//        str = "ошибка обмена";
-//        InsertStrToList();
-//        com.Close();
-//        return;
-//    }
-
-//	for(i=0;i<(ilboot>>3);i++)
-//	{
-//		txdbuf[0] = 'Y';
-//		txdbuf[1] = (dwadrboot+8*i) & 0xff;
-//		txdbuf[2] = ((dwadrboot+8*i)>>8) & 0xff;
-//		txdbuf[3] = 0;
-//		txdbuf[4] = 0x20;
-//		txdbuf[5] = 8;
-//		txdbuf[6] = 0;
-//		txdbuf[7] = 0;
-//		txdbuf[8] = 0;
-//		com.WriteBlock(txdbuf,9);
-//		f = TRUE;
-//		Sleep(1);
-
-//		if((com.ReadBlock(rxdbuf,10, true))&&(rxdbuf[0]=='Y')&&(rxdbuf[9]=='K'))
-//		{
-//			for(j=0;j<8;j++)
-//			{
-//				if(rxdbuf[j+1] != (char)bufram[dwadrboot+8*i+j])
-//					f= FALSE;
-//			}
-//		}
-//		else
-//			f= FALSE;
-//		if(!f)
-//		{
-//			str = "ошибка обмена";
-//			InsertStrToList();
-//			com.Close();
-//			return;
-//		}
-//	}
-//	txdbuf[0] = 'R';
-//	txdbuf[1] = dwadrboot & 0xff;
-//	txdbuf[2] = (dwadrboot>>8) & 0xff;
-//	txdbuf[3] = 0;
-//	txdbuf[4] = 0x20;
-//	com.WriteBlock(txdbuf,5);
-//	Sleep(1);
-
-//	if	((!com.ReadBlock(rxdbuf,1, true))||(rxdbuf[0]!='R'))
-//	{
-//		str = "ошибка обмена";
-//		InsertStrToList();
-//		com.Close();
-//		return;
-//	}
-//	txdbuf[0] = 'I';
-//	com.WriteBlock(txdbuf,1);
-//	f = TRUE;
-//	Sleep(1);
-
-//	if(com.ReadBlock(rxdbuf,12, true))
-//	{
-//		for(j=0;j<12;j++)
-//			{
-//				if(rxdbuf[j] != id_str[j])
-//					f= FALSE;
-//			}
-//	}
-//	else
-//		f = FALSE;
-//	if(!f)
-//	{
-//		str = "ошибка идентификации загрузчика!";
-//		InsertStrToList();
-//		com.Close();
-//		return;
-//	}
-//	m_list.DeleteString(m_list.GetCount()-1);
-//	str = "boot load...ОК!";
-//	InsertStrToList();
-
-//	if(m_erase.GetCheck()==BST_CHECKED)
-//		if(!Erase())
-//			return;
-//	if(m_program.GetCheck()==BST_CHECKED)
-//		if(!Program())
-//			return;
-//	if(m_verify.GetCheck()==BST_CHECKED)
-//		if(!Verify())
-//			return;
-//	if(fStartRun)
-//	{
-//		str = "Run at 0x08000000...";
-//		InsertStrToList();
-//		txdbuf[0] = 'R';
-//		com.WriteBlock(txdbuf,1);
-//		Sleep(1);
-
-//		if	((!com.ReadBlock(rxdbuf,1, true))||(rxdbuf[0]!='R'))
-//		{
-//			str = "ошибка обмена";
-//			InsertStrToList();
-//		}
-//		else
-//		{
-//			m_list.DeleteString(m_list.GetCount()-1);
-//			str = "Run at 0x08000000 OK!";
-//			InsertStrToList();
-//		}
-//	}
-//	com.Close();
-
 }
 
 //BOOL Programmer::Program(void)

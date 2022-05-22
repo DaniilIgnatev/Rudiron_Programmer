@@ -24,9 +24,11 @@ int UART::count()
     return this->rx_buffer_index;
 }
 
-bool UART::begin(QString name)
+bool UART::begin(QSerialPortInfo port)
 {
-    serial = new QSerialPort(name, this);
+    serial = new QSerialPort(port, this);
+    serial->setReadBufferSize(64);
+
     connect(serial, &QSerialPort::errorOccurred, this, &UART::errorSlot);
     connect(serial, &QSerialPort::readyRead, this, &UART::readyReadSlot);
 
@@ -50,6 +52,10 @@ bool UART::begin(QString name)
         return false;
     }
 
+    while(!serial->isOpen()){
+        QThread::currentThread()->msleep(1);
+    }
+
     return true;
 }
 
@@ -60,9 +66,12 @@ void UART::end()
 }
 
 void UART::errorSlot(QSerialPort::SerialPortError error){
-    QMetaEnum metaEnum = QMetaEnum::fromType<QSerialPort::SerialPortError>();
-    QString error_str = metaEnum.valueToKey(error);
-    qDebug() << "Serial error: " << error_str;
+    if (error != QSerialPort::NoError){
+        QMetaEnum metaEnum = QMetaEnum::fromType<QSerialPort::SerialPortError>();
+        QString error_str = metaEnum.valueToKey(error);
+        qDebug() << "Serial error: " << error_str;
+        qDebug() << serial->errorString();
+    }
 }
 
 void UART::write(char byte)
@@ -75,8 +84,13 @@ void UART::write(char byte)
 void UART::write(QByteArray buffer)
 {
     serial->write(buffer);
-    serial->waitForBytesWritten();
-    QThread::currentThread()->msleep(1);
+    serial->waitForReadyRead(2000);
+
+//    for (auto byte: buffer){
+//        serial->write(QByteArray(1, byte));
+//        serial->waitForBytesWritten();
+//        QThread::currentThread()->msleep(5);
+//    }
 }
 
 int UART::readByte()
@@ -120,4 +134,36 @@ int UART::popByte()
     rx_buffer_index -= 1;
 
     return byte;
+}
+
+void UART::waitRead(int timeout)
+{
+    int time = 0;
+    const int pause = 1;
+
+    while(serial->atEnd()){
+        QThread::currentThread()->msleep(pause);
+        time += pause;
+
+        if (time >= timeout){
+            return;
+        }
+    }
+
+    while(!serial->atEnd()){
+        QThread::currentThread()->msleep(pause);
+        time += pause;
+
+        if (time >= timeout){
+            return;
+        }
+    }
+}
+
+void UART::clearRXBuffer()
+{
+    for (int i = 0; i < rx_buffer_index; i++){
+        rx_buffer[i] = 0;
+    }
+    rx_buffer_index = 0;
 }

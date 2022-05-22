@@ -31,7 +31,19 @@ public:
 
 private:
 
+    void sync();
+
+    void flashBootloader();
+
+    void flashBootloader_sync();
+
+    void flashBootloader_load();
+
+    void flashBootloader_verify();
+
     BOOL Program(void);
+
+
 
 
 public:

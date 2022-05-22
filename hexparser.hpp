@@ -53,6 +53,9 @@ protected:
 
 public:
 
+    ///Выделяет область используемых программой в буфере байт
+    QByteArray getOccupiedProgrammBuffer();
+
     size_t getProgramm_dwadr() const;
 
     size_t getProgramm_il() const;
