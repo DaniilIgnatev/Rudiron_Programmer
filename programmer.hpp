@@ -16,8 +16,8 @@ class Programmer : public QObject
 private:
     UART uart;
 
-    QString bootloader_path = "C:/Users/daniil/YandexDisk/Documents/Rudiron/Distributive/components/win_x64/RudironDistributive/tools/UART programmer/1986UARTWSD/1986_BOOT_UART.hex";
-    QString programm_path = "C:/Users/daniil/YandexDisk/Documents/Rudiron/Distributive/components/win_x64/RudironDistributive/tools/UART programmer/1986UARTWSD/RudironDiagnostics.hex";
+    QString bootloader_path = "/Users/daniilignatev/GitHub/RudironProgrammer/1986_BOOT_UART.hex";
+    QString programm_path = "/Users/daniilignatev/GitHub/RudironProgrammer/RudironDiagnostics.hex";
 
     HEXRAMParser ramParser;
     HexFlashParser flashParser;
@@ -42,6 +42,8 @@ private:
     bool flashBootloader_verify();
 
     bool flashBootloader_run();
+
+    bool flashBootloader_identify();
 
     BOOL Program(void);
 

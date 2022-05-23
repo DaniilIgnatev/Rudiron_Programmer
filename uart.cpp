@@ -78,13 +78,18 @@ void UART::write(char byte)
 {
     serial->write(QByteArray(1, byte));
     serial->waitForBytesWritten();
-    QThread::currentThread()->msleep(1);
+    QThread::currentThread()->msleep(5);
 }
 
-void UART::write(QByteArray buffer, int timeout)
+void UART::write(QByteArray buffer, int timeout, int waitRXBytes)
 {
     serial->write(buffer);
     serial->waitForReadyRead(timeout);
+
+    while (rx_buffer_index < waitRXBytes){
+        QThread::currentThread()->msleep(5);
+        serial->waitForReadyRead(timeout);
+    }
 }
 
 int UART::readByte()

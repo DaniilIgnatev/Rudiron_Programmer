@@ -33,7 +33,7 @@ public:
 
     void write(char byte);
 
-    void write(QByteArray buffer, int timeout = 2000);
+    void write(QByteArray buffer, int timeout = 2000, int waitRXBytes = 1);
 
     void write(char* buffer, int size);
 

@@ -64,6 +64,7 @@ bool Programmer::flashBootloader()
     success &= flashBootloader_sync();
     success &= flashBootloader_load();
     success &= flashBootloader_verify();
+    success &= flashBootloader_run();
 
     return success;
 }
@@ -146,7 +147,7 @@ bool Programmer::flashBootloader_verify()
         txdbuf[7] = 0;
         txdbuf[8] = 0;
         uart.clearRXBuffer();
-        uart.write(txdbuf, 25);
+        uart.write(txdbuf, 30, 9);
 
         if ((uart.getByte(0) == 'Y') && (uart.getByte(9) == 'K')){
             for (int j = 0; j < 8; j++){
@@ -169,48 +170,55 @@ bool Programmer::flashBootloader_verify()
 
 bool Programmer::flashBootloader_run()
 {
-    //	txdbuf[0] = 'R';
-    //	txdbuf[1] = dwadrboot & 0xff;
-    //	txdbuf[2] = (dwadrboot>>8) & 0xff;
-    //	txdbuf[3] = 0;
-    //	txdbuf[4] = 0x20;
-    //	com.WriteBlock(txdbuf,5);
-    //	Sleep(1);
+    qDebug() << "Начал запуск бутлодера...";
 
-    //	if	((!com.ReadBlock(rxdbuf,1, true))||(rxdbuf[0]!='R'))
-    //	{
-    //		str = "ошибка обмена";
-    //		InsertStrToList();
-    //		com.Close();
-    //		return;
-    //	}
-    //	txdbuf[0] = 'I';
-    //	com.WriteBlock(txdbuf,1);
-    //	f = TRUE;
-    //	Sleep(1);
+    txdbuf.resize(5);
+    txdbuf[0] = 'R';
+    txdbuf[1] = ramParser.getProgramm_dwadr() & 0xff;
+    txdbuf[2] = (ramParser.getProgramm_dwadr() >> 8) & 0xff;
+    txdbuf[3] = 0;
+    txdbuf[4] = 0x20;
+    uart.clearRXBuffer();
+    uart.write(txdbuf, 30);
 
-    //	if(com.ReadBlock(rxdbuf,12, true))
-    //	{
-    //		for(j=0;j<12;j++)
-    //			{
-    //				if(rxdbuf[j] != id_str[j])
-    //					f= FALSE;
-    //			}
-    //	}
-    //	else
-    //		f = FALSE;
-    //	if(!f)
-    //	{
-    //		str = "ошибка идентификации загрузчика!";
-    //		InsertStrToList();
-    //		com.Close();
-    //		return;
-    //	}
-    //	m_list.DeleteString(m_list.GetCount()-1);
-    //	str = "boot load...ОК!";
-    //	InsertStrToList();
+    if	(uart.getByte(0) != 'R'){
+        qDebug() << "Ошибка запуска бутлодера...";
+        uart.end();
+        return false;
+    }
 
+    uart.clearRXBuffer();
+    qDebug() << "Завершил запуск бутлодера...";
     return true;
+}
+
+bool Programmer::flashBootloader_identify()
+{
+//    txdbuf[0] = 'I';
+//    com.WriteBlock(txdbuf,1);
+//    f = TRUE;
+
+//    if (com.ReadBlock(rxdbuf, 12, true)){
+//        for (j = 0; j < 12; j++){
+//            if(rxdbuf[j] != id_str[j]){
+//                f = FALSE;
+//            }
+//        }
+//    }
+//    else{
+//        f = FALSE;
+//    }
+
+//    if (!f){
+//        str = "ошибка идентификации загрузчика!";
+//        InsertStrToList();
+//        com.Close();
+//        return;
+//    }
+
+//    m_list.DeleteString(m_list.GetCount() - 1);
+//    str = "boot load...ОК!";
+//    InsertStrToList();
 }
 
 //BOOL Programmer::Program(void)
