@@ -53,7 +53,7 @@ bool UART::begin(QSerialPortInfo port)
     }
 
     while(!serial->isOpen()){
-        QThread::currentThread()->msleep(eventloop_delay);
+        QThread::currentThread()->msleep(5);
     }
 
     return true;
@@ -78,21 +78,22 @@ bool UART::write(char byte)
 {
     serial->write(QByteArray(1, byte));
     bool written = serial->waitForBytesWritten();
-    QThread::currentThread()->msleep(eventloop_delay);
+    QThread::currentThread()->msleep(write_delay);
 
     return written;
 }
 
-bool UART::writeAndReceive(QByteArray buffer, int timeout, int waitRXBytes)
+bool UART::writeAndReceive(QByteArray buffer, int waitRXBytes)
 {
+    int timeout = waitRXBytes * 100;
     int time = 0;
     serial->write(buffer);
     serial->waitForReadyRead(timeout);
 
     while (time < timeout && rx_buffer_index < waitRXBytes){
-        QThread::currentThread()->msleep(eventloop_delay);
+        QThread::currentThread()->msleep(write_delay);
         serial->waitForReadyRead(timeout);
-        time += eventloop_delay;
+        time += write_delay;
     }
 
     return time < timeout && rx_buffer_index >= waitRXBytes;

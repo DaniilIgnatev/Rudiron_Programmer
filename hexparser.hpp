@@ -40,29 +40,29 @@ public:
 
 protected:
     ///Адрес смещения в буффере загружаемого массива байт
-    int programm_dwadr;
+    int program_dwadr;
 
     ///Размер загружаемого массива байт
-    int programm_il;
+    int program_il;
 
     ///Размер адресного пространства
-    int programm_buffer_size;
+    int program_buffer_size;
 
     ///Адресное пространство
-    QByteArray programm_buffer;
+    QByteArray program_buffer;
 
 public:
 
     ///Выделяет область используемых программой в буфере байт
-    QByteArray getOccupiedProgrammBuffer();
+    QByteArray getProgramBuffer_notEmpty();
 
-    int getProgramm_dwadr() const;
+    int getProgram_dwadr() const;
 
-    int getProgramm_il() const;
+    int getProgram_il() const;
 
-    int getProgramm_buffer_size() const;
+    int getProgram_buffer_size() const;
 
-    const QByteArray &getProgramm_buffer() const;
+    const QByteArray &getProgram_buffer() const;
 
 signals:
 

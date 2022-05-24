@@ -17,8 +17,8 @@ BOOL HexFlashParser::initialize(void)
     dwadr_seg_hex = 0;
     dwadr_lineoffs_hex = 0;
 
-    for (int i = 0; i < programm_buffer.size(); i++){
-        programm_buffer[i] = BYTE_MAX;
+    for (int i = 0; i < program_buffer.size(); i++){
+        program_buffer[i] = BYTE_MAX;
     }
 
     if (!file.open(QIODevice::ReadWrite)){
@@ -38,20 +38,20 @@ BOOL HexFlashParser::initialize(void)
         if (nb != 1){
             file.close();
 
-            for (i = 0; i < programm_buffer.size(); i++){
-                if((unsigned char)programm_buffer.at(i) != BYTE_MAX)
+            for (i = 0; i < program_buffer.size(); i++){
+                if((unsigned char)program_buffer.at(i) != BYTE_MAX)
                     break;
             }
-            programm_dwadr = i;
+            program_dwadr = i;
 
-            for (i = (programm_buffer.size() - 1); i >= 0; i--){
-                if ((unsigned char)programm_buffer.at(i) != BYTE_MAX){
+            for (i = (program_buffer.size() - 1); i >= 0; i--){
+                if ((unsigned char)program_buffer.at(i) != BYTE_MAX){
                     break;
                 }
             }
 
             i = ((i + 0x100) & 0xffffff00);
-            programm_il = i;
+            program_il = i;
             return 1;
         }
 
@@ -69,7 +69,7 @@ BOOL HexFlashParser::initialize(void)
 
             dwadr -= 0x08000000;
             for (i = 0;i < bl_hex; i++){
-                programm_buffer[(int)dwadr + i] = buf_data_hex[i];
+                program_buffer[(int)dwadr + i] = buf_data_hex[i];
             }
         }
     }

@@ -10,6 +10,15 @@
 #include "hexflashparser.hpp"
 
 
+enum ProgrammerOptions{
+    None = 0,
+    Erase = 1,
+    Programm = 2,
+    Verify = 4,
+    Run = 8
+};
+
+
 class Programmer : public QObject
 {
     Q_OBJECT
@@ -25,6 +34,8 @@ private:
 
     QByteArray txdbuf;
 
+    ProgrammerOptions options = ProgrammerOptions::Programm;
+
 public:
     explicit Programmer(QObject *parent = nullptr);
 
@@ -33,8 +44,6 @@ public:
 private:
 
     void sync();
-
-    bool flashBootloader();
 
     bool flashBootloader_sync();
 
@@ -46,12 +55,14 @@ private:
 
     bool flashBootloader_identify();
 
-    BOOL Program(void);
-
-
-
+    bool flashProgram_load();
 
 public:
+
+    ProgrammerOptions getOptions() const;
+    bool optionChecked(ProgrammerOptions option);
+    void setOptions(ProgrammerOptions newOptions);
+    void checkOption(ProgrammerOptions option);
 
 signals:
 

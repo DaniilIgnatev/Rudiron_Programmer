@@ -12,7 +12,7 @@ class UART : public QObject
     Q_OBJECT
 private:
 
-    static const int eventloop_delay = 5;
+    static const int write_delay = 5;
 
     QSerialPort* serial = nullptr;
 
@@ -36,7 +36,7 @@ public:
 
     bool write(char byte);
 
-    bool writeAndReceive(QByteArray buffer, int timeout = 50, int waitRXBytes = 1);
+    bool writeAndReceive(QByteArray buffer, int waitRXBytes);
 
     int readByte();
 

@@ -3,8 +3,8 @@
 HEXParser::HEXParser(int buf_programm_size, QObject *parent)
     : QObject{parent}
 {
-    this->programm_buffer_size = buf_programm_size;
-    this->programm_buffer.resize((int)programm_buffer_size);
+    this->program_buffer_size = buf_programm_size;
+    this->program_buffer.resize((int)program_buffer_size);
 }
 
 const QString &HEXParser::getHexFilePath() const
@@ -71,31 +71,30 @@ BYTE HEXParser::GetHexByte(size_t ibuf)
     return bh + bl;
 }
 
-QByteArray HEXParser::getOccupiedProgrammBuffer()
+QByteArray HEXParser::getProgramBuffer_notEmpty()
 {
-   int dwadr = (int)getProgramm_dwadr();
-   int il = (int)getProgramm_il();
+   int dwadr = (int)getProgram_dwadr();
+   int il = (int)getProgram_il();
 
-   QByteArray mid = getProgramm_buffer().mid(dwadr, il);
-   return mid;
+   return getProgram_buffer().mid(dwadr, il);
 }
 
-const QByteArray &HEXParser::getProgramm_buffer() const
+const QByteArray &HEXParser::getProgram_buffer() const
 {
-    return programm_buffer;
+    return program_buffer;
 }
 
-int HEXParser::getProgramm_buffer_size() const
+int HEXParser::getProgram_buffer_size() const
 {
-    return programm_buffer_size;
+    return program_buffer_size;
 }
 
-int HEXParser::getProgramm_il() const
+int HEXParser::getProgram_il() const
 {
-    return programm_il;
+    return program_il;
 }
 
-int HEXParser::getProgramm_dwadr() const
+int HEXParser::getProgram_dwadr() const
 {
-    return programm_dwadr;
+    return program_dwadr;
 }

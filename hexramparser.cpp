@@ -12,8 +12,8 @@ BOOL HEXRAMParser::initialize(void)
     dwadr_seg_hex = 0;
     dwadr_lineoffs_hex = 0;
 
-    for (int i = 0; i < programm_buffer_size; i++){
-        programm_buffer[(int)i] = BYTE_MAX;
+    for (int i = 0; i < program_buffer_size; i++){
+        program_buffer[(int)i] = BYTE_MAX;
     }
 
     QFile file(hexFilePath);
@@ -34,18 +34,18 @@ BOOL HEXRAMParser::initialize(void)
         if (nb != 1){
             file.close();
 
-            for (i = 0; i < programm_buffer_size; i++){
-                if((unsigned char)programm_buffer.at((int)i) != BYTE_MAX)
+            for (i = 0; i < program_buffer_size; i++){
+                if((unsigned char)program_buffer.at((int)i) != BYTE_MAX)
                     break;
             }
 
-            programm_dwadr = i;
-            for (i = (programm_buffer_size - 1); i >= 0; i--){
-                if((unsigned char)programm_buffer.at((int)i) != BYTE_MAX)
+            program_dwadr = i;
+            for (i = (program_buffer_size - 1); i >= 0; i--){
+                if((unsigned char)program_buffer.at((int)i) != BYTE_MAX)
                     break;
             }
 
-            programm_il = (i + 8 - programm_dwadr) & 0xfffffff8;
+            program_il = (i + 8 - program_dwadr) & 0xfffffff8;
             return 1;
         }
 
@@ -63,7 +63,7 @@ BOOL HEXRAMParser::initialize(void)
 
             dwadr -= 0x20000000;
             for (i = 0; i < bl_hex; i++){
-                programm_buffer[(int)dwadr + (int)i] = buf_data_hex[i];
+                program_buffer[(int)dwadr + (int)i] = buf_data_hex[i];
             }
         }
     }
