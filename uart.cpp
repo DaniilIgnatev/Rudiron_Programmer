@@ -27,7 +27,6 @@ int UART::count()
 bool UART::begin(QSerialPortInfo port)
 {
     serial = new QSerialPort(port, this);
-    serial->setReadBufferSize(64);
 
     connect(serial, &QSerialPort::errorOccurred, this, &UART::errorSlot);
     connect(serial, &QSerialPort::readyRead, this, &UART::readyReadSlot);
@@ -65,6 +64,11 @@ void UART::end()
     serial->deleteLater();
 }
 
+void UART::setBaudRate(QSerialPort::BaudRate rate)
+{
+    serial->setBaudRate(rate);
+}
+
 void UART::errorSlot(QSerialPort::SerialPortError error){
     if (error != QSerialPort::NoError && error != QSerialPort::TimeoutError){
         QMetaEnum metaEnum = QMetaEnum::fromType<QSerialPort::SerialPortError>();
@@ -77,15 +81,15 @@ void UART::errorSlot(QSerialPort::SerialPortError error){
 bool UART::write(char byte)
 {
     serial->write(QByteArray(1, byte));
-    bool written = serial->waitForBytesWritten();
     QThread::currentThread()->msleep(write_delay);
+    bool written = serial->waitForBytesWritten(write_delay * 2);
 
     return written;
 }
 
 bool UART::writeAndReceive(QByteArray buffer, int waitRXBytes)
 {
-    int timeout = waitRXBytes * 100;
+    int timeout = waitRXBytes * 25;
     int time = 0;
     serial->write(buffer);
     serial->waitForReadyRead(timeout);

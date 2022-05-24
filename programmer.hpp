@@ -34,7 +34,7 @@ private:
 
     QByteArray txdbuf;
 
-    ProgrammerOptions options = ProgrammerOptions::Programm;
+    ProgrammerOptions options;
 
 public:
     explicit Programmer(QObject *parent = nullptr);
@@ -47,6 +47,8 @@ private:
 
     bool flashBootloader_sync();
 
+    bool flashBootloader_switchSpeed();
+
     bool flashBootloader_load();
 
     bool flashBootloader_verify();
@@ -56,6 +58,8 @@ private:
     bool flashBootloader_identify();
 
     bool flashProgram_load();
+
+    bool flashProgram_run();
 
 public:
 

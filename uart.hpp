@@ -12,7 +12,7 @@ class UART : public QObject
     Q_OBJECT
 private:
 
-    static const int write_delay = 5;
+    static const int write_delay = 1;
 
     QSerialPort* serial = nullptr;
 
@@ -33,6 +33,8 @@ public:
     bool begin(QSerialPortInfo port);
 
     void end();
+
+    void setBaudRate(QSerialPort::BaudRate rate);
 
     bool write(char byte);
 

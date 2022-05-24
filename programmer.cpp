@@ -28,6 +28,9 @@ Programmer::Programmer(QObject *parent)
 
     flashParser.setHexPath(this->programm_path);
     flashParser.initialize();
+
+    this->checkOption(ProgrammerOptions::Programm);
+    this->checkOption(ProgrammerOptions::Run);
 }
 
 void Programmer::start()
@@ -44,6 +47,9 @@ void Programmer::start()
     }
 
     if (!flashBootloader_sync()){
+        return;
+    }
+    if (!flashBootloader_switchSpeed()){
         return;
     }
     if (!flashBootloader_load()){
@@ -70,23 +76,9 @@ void Programmer::start()
 //            return;
 
     if (optionChecked(ProgrammerOptions::Run)){
-//        str = "Run at 0x08000000...";
-//        InsertStrToList();
-//        txdbuf[0] = 'R';
-//        com.WriteBlock(txdbuf,1);
-//        Sleep(1);
-
-//        if	((!com.ReadBlock(rxdbuf,1, true))||(rxdbuf[0]!='R'))
-//        {
-//            str = "ошибка обмена";
-//            InsertStrToList();
-//        }
-//        else
-//        {
-//            m_list.DeleteString(m_list.GetCount()-1);
-//            str = "Run at 0x08000000 OK!";
-//            InsertStrToList();
-//        }
+        if (!flashProgram_run()){
+            return;
+        }
     }
 
     uart.end();
@@ -113,6 +105,36 @@ bool Programmer::flashBootloader_sync()
 
     qDebug() << "Завершил синхронизацию.";
     uart.clearRXBuffer();
+    return true;
+}
+
+bool Programmer::flashBootloader_switchSpeed()
+{
+    qDebug() << "Начал установку скорости обмена 115200 бод.";
+
+    txdbuf.resize(5);
+    txdbuf[0] = 'B';
+    txdbuf[1] = 0x0;
+    txdbuf[2] = (char)0xc2;
+    txdbuf[3] = 0x01;
+    txdbuf[4] = 0x0;
+    uart.clearRXBuffer();
+    uart.writeAndReceive(txdbuf,1);
+
+    uart.setBaudRate(QSerialPort::BaudRate::Baud115200);
+
+    txdbuf.resize(1);
+    txdbuf[0] = 0xd;
+    uart.clearRXBuffer();
+    uart.writeAndReceive(txdbuf, 3);
+
+    if	(uart.getByte(0) != 0xd || uart.getByte(1) != 0xa || uart.getByte(2) != 0x3e){
+        qDebug() << "Ошибка установки скорости обмена 115200 бод!";
+        uart.end();
+        return false;
+    }
+
+    qDebug() << "Закончил установку скорости обмена 115200 бод.";
     return true;
 }
 
@@ -170,7 +192,7 @@ bool Programmer::flashBootloader_verify()
         txdbuf[7] = 0;
         txdbuf[8] = 0;
         uart.clearRXBuffer();
-        bool received = uart.writeAndReceive(txdbuf, 9);
+        bool received = uart.writeAndReceive(txdbuf, 10);
 
         if (received && (uart.getByte(0) == 'Y') && (uart.getByte(9) == 'K')){
             for (int j = 0; j < 8; j++){
@@ -263,7 +285,7 @@ bool Programmer::flashProgram_load()
         return false;
     }
 
-    // шаг в памяти каждые 256 байт
+    // шагаем по памяти каждые 256 байт
     for (int i = 0; i < (flashParser.getProgram_il() >> 8); i++){
         uart.write('P');
 
@@ -285,6 +307,22 @@ bool Programmer::flashProgram_load()
     }
 
     qDebug() << "Завершил загрузку основной программы.";
+    return true;
+}
+
+bool Programmer::flashProgram_run()
+{
+    qDebug() << "Начал запуск основной программы.";
+
+    uart.write('R');
+
+    if	(!uart.getByte('R')){
+        qDebug() << "Ошибка при запуске основной программы!";
+        uart.end();
+        return false;
+    }
+
+    qDebug() << "Завершил запуск основной программы.";
     return true;
 }
 
