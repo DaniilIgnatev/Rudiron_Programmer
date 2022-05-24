@@ -16,6 +16,7 @@ class Programmer : public QObject
 private:
     UART uart;
 
+    const QString id_str = "1986BOOTUART";
     QString bootloader_path = "/Users/daniilignatev/GitHub/RudironProgrammer/1986_BOOT_UART.hex";
     QString programm_path = "/Users/daniilignatev/GitHub/RudironProgrammer/RudironDiagnostics.hex";
 

@@ -65,6 +65,7 @@ bool Programmer::flashBootloader()
     success &= flashBootloader_load();
     success &= flashBootloader_verify();
     success &= flashBootloader_run();
+    success &= flashBootloader_identify();
 
     return success;
 }
@@ -107,9 +108,9 @@ bool Programmer::flashBootloader_load()
     txdbuf[7] = 0;
     txdbuf[8] = 0;
     uart.clearRXBuffer();
-    uart.write(txdbuf);
+    bool received = uart.writeAndReceive(txdbuf);
 
-    if	(uart.getByte(0) != 'L')
+    if	(received && uart.getByte(0) != 'L')
     {
         qDebug() << "Ошибка загрузки бутлодера в начале!";
         uart.end();
@@ -117,8 +118,8 @@ bool Programmer::flashBootloader_load()
     }
 
     uart.clearRXBuffer();
-    uart.write(ramParser.getOccupiedProgrammBuffer());
-    if	(uart.getByte(0) !='K')
+    received = uart.writeAndReceive(ramParser.getOccupiedProgrammBuffer(), 2000);
+    if	(received && uart.getByte(0) !='K')
     {
         qDebug() << "Ошибка загрузки бутлодера в конце!";
         uart.end();
@@ -147,11 +148,13 @@ bool Programmer::flashBootloader_verify()
         txdbuf[7] = 0;
         txdbuf[8] = 0;
         uart.clearRXBuffer();
-        uart.write(txdbuf, 30, 9);
+        bool received = uart.writeAndReceive(txdbuf, 50, 9);
 
-        if ((uart.getByte(0) == 'Y') && (uart.getByte(9) == 'K')){
+        if (received && (uart.getByte(0) == 'Y') && (uart.getByte(9) == 'K')){
             for (int j = 0; j < 8; j++){
                 if ((unsigned char)uart.getByte(j + 1) != (unsigned char)ramParser.getProgramm_buffer().at(ramParser.getProgramm_dwadr() + 8 * i + j)){
+                    qDebug() << "Ошибка верификации бутлодера!";
+                    uart.end();
                     return false;
                 }
             }
@@ -179,10 +182,10 @@ bool Programmer::flashBootloader_run()
     txdbuf[3] = 0;
     txdbuf[4] = 0x20;
     uart.clearRXBuffer();
-    uart.write(txdbuf, 30);
+    bool received = uart.writeAndReceive(txdbuf);
 
-    if	(uart.getByte(0) != 'R'){
-        qDebug() << "Ошибка запуска бутлодера...";
+    if	(received && uart.getByte(0) != 'R'){
+        qDebug() << "Ошибка запуска бутлодера!";
         uart.end();
         return false;
     }
@@ -194,31 +197,29 @@ bool Programmer::flashBootloader_run()
 
 bool Programmer::flashBootloader_identify()
 {
-//    txdbuf[0] = 'I';
-//    com.WriteBlock(txdbuf,1);
-//    f = TRUE;
+    qDebug() << "Начал идентификацию загрузчика!";
 
-//    if (com.ReadBlock(rxdbuf, 12, true)){
-//        for (j = 0; j < 12; j++){
-//            if(rxdbuf[j] != id_str[j]){
-//                f = FALSE;
-//            }
-//        }
-//    }
-//    else{
-//        f = FALSE;
-//    }
+    txdbuf.resize(1);
+    txdbuf[0] = 'I';
+    uart.clearRXBuffer();
+    bool received = uart.writeAndReceive(txdbuf, 50, 12);
 
-//    if (!f){
-//        str = "ошибка идентификации загрузчика!";
-//        InsertStrToList();
-//        com.Close();
-//        return;
-//    }
+    if (!received){
+        qDebug() << "Ошибка идентификации загрузчика!";
+        uart.end();
+        return false;
+    }
 
-//    m_list.DeleteString(m_list.GetCount() - 1);
-//    str = "boot load...ОК!";
-//    InsertStrToList();
+    for (int j = 0; j < 12; j++){
+        if( uart.getByte(j) != id_str[j]){
+            qDebug() << "Ошибка идентификации загрузчика!";
+            uart.end();
+            return false;
+        }
+    }
+
+    qDebug() << "Завершил идентификацию загрузчика!";
+    return true;
 }
 
 //BOOL Programmer::Program(void)

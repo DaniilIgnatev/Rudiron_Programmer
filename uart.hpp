@@ -11,6 +11,9 @@ class UART : public QObject
 {
     Q_OBJECT
 private:
+
+    static const int eventloop_delay = 5;
+
     QSerialPort* serial = nullptr;
 
     static const unsigned char rx_buffer_size = 255;
@@ -31,11 +34,9 @@ public:
 
     void end();
 
-    void write(char byte);
+    bool write(char byte);
 
-    void write(QByteArray buffer, int timeout = 2000, int waitRXBytes = 1);
-
-    void write(char* buffer, int size);
+    bool writeAndReceive(QByteArray buffer, int timeout = 50, int waitRXBytes = 1);
 
     int readByte();
 
