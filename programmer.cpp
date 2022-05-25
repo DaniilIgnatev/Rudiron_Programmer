@@ -31,6 +31,7 @@ Programmer::Programmer(QObject *parent)
 
 //    this->checkOption(ProgrammerOptions::Erase);
     this->checkOption(ProgrammerOptions::Programm);
+    this->checkOption(ProgrammerOptions::Verify);
     this->checkOption(ProgrammerOptions::Run);
 }
 
@@ -80,10 +81,11 @@ void Programmer::start()
             return;
         }
     }
-//    if (m_verify.GetCheck() == BST_CHECKED)
-//        if(!Verify())
-//            return;
-
+    if (optionChecked(ProgrammerOptions::Verify)){
+        if (!flashProgram_verify()){
+            return;
+        }
+    }
     if (optionChecked(ProgrammerOptions::Run)){
         if (!flashProgram_run()){
             return;
@@ -168,8 +170,7 @@ bool Programmer::flashBootloader_load()
     uart.clearRXBuffer();
     bool received = uart.writeAndReceive(txdbuf, 1);
 
-    if	(received && uart.getByte(0) != 'L')
-    {
+    if	(received && uart.getByte(0) != 'L'){
         qDebug() << "Ошибка загрузки бутлодера в начале!";
         uart.end();
         return false;
@@ -177,8 +178,7 @@ bool Programmer::flashBootloader_load()
 
     uart.clearRXBuffer();
     received = uart.writeAndReceive(ramParser.getProgramBuffer_notEmpty(), 1);
-    if	(received && uart.getByte(0) !='K')
-    {
+    if	(received && uart.getByte(0) !='K'){
         qDebug() << "Ошибка загрузки бутлодера в конце!";
         uart.end();
         return false;
@@ -193,8 +193,7 @@ bool Programmer::flashBootloader_verify()
 {
     qDebug() << "Начал верификацию бутлодера.";
 
-    for (int i = 0; i < (ramParser.getProgram_il() >> 3); i++)
-    {
+    for (int i = 0; i < (ramParser.getProgram_il() >> 3); i++){
         txdbuf.resize(9);
         txdbuf[0] = 'Y';
         txdbuf[1] = (ramParser.getProgram_dwadr() + 8 * i) & 0xff;
@@ -269,7 +268,7 @@ bool Programmer::flashBootloader_identify()
     }
 
     for (int j = 0; j < 12; j++){
-        if( uart.getByte(j) != id_str[j]){
+        if (uart.getByte(j) != id_str[j]){
             qDebug() << "Ошибка идентификации загрузчика!";
             uart.end();
             return false;
@@ -349,9 +348,61 @@ bool Programmer::flashProgram_load()
             uart.end();
             return false;
         }
+
+        qDebug() << "Прогресс загрузки: " << ((double)(i + 1) / (double)(flashParser.getProgram_il() >> 8)) * 100.0 << "%.";
     }
 
     qDebug() << "Завершил загрузку основной программы.";
+    return true;
+}
+
+bool Programmer::flashProgram_verify()
+{
+    qDebug() << "Начал проверку основной программы.";
+
+    txdbuf.resize(5);
+    txdbuf[0] = 'A';
+    txdbuf[1] = 0x00;
+    txdbuf[2] = 0x00;
+    txdbuf[3] = 0x00;
+    txdbuf[4] = 0x08;
+    uart.clearRXBuffer();
+    bool received = uart.writeAndReceive(txdbuf, 1);
+
+    if (!received || uart.getByte(0) != 0x08){
+        qDebug() << "Ошибка при проверке основной программы!";
+        uart.end();
+        return false;
+    }
+
+    txdbuf.resize(1);
+    txdbuf[0] = 'V';
+    for (int i = 0;i < (flashParser.getProgram_il() >> 8); i++){
+        for (int j = 0; j < 32; j++){
+            uart.clearRXBuffer();
+            received = uart.writeAndReceive(txdbuf, 8);
+            if (!received){
+                qDebug() << "Ошибка при проверке основной программы!";
+                uart.end();
+                return false;
+            }
+
+            for (int k = 0; k < 8; k++){
+                if ((BYTE)uart.getByte(k) != (BYTE)flashParser.getProgram_buffer().at(k + (j << 3) + (i << 8))){
+                    qDebug() << "Ошибка при проверке основной программы!";
+                    qDebug() << "Адрес:" << QString::number(0x08000000 + k + (j << 3) + (i << 8), 16)
+                             << ". Записано:" << QString::number((BYTE)flashParser.getProgram_buffer().at(k + (j << 3) + (i << 8)), 16)
+                             << ". Прочитано:" << QString::number((BYTE)ramParser.getProgram_buffer().at(k), 16)
+                             << ".";
+                    uart.end();
+                    return false;
+                }
+            }
+        }
+        qDebug() << "Прогресс проверки: " << ((double)(i + 1) / (double)(flashParser.getProgram_il() >> 8)) * 100.0 << "%.";
+    }
+
+    qDebug() << "Завершил проверку основной программы.";
     return true;
 }
 

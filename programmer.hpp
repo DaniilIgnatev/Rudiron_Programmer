@@ -61,6 +61,8 @@ private:
 
     bool flashProgram_load();
 
+    bool flashProgram_verify();
+
     bool flashProgram_run();
 
 public:
