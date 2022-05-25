@@ -29,6 +29,7 @@ Programmer::Programmer(QObject *parent)
     flashParser.setHexPath(this->programm_path);
     flashParser.initialize();
 
+//    this->checkOption(ProgrammerOptions::Erase);
     this->checkOption(ProgrammerOptions::Programm);
     this->checkOption(ProgrammerOptions::Run);
 }
@@ -36,14 +37,18 @@ Programmer::Programmer(QObject *parent)
 void Programmer::start()
 {
     auto ports = QSerialPortInfo::availablePorts();
+    QSerialPortInfo port;
+
     for (auto &p: ports){
         if (p.productIdentifier() == 60000){
-            if (!uart.begin(p)){
-                qDebug() << "Ошибка открытия COM порта...";
-                return;
-            }
+            port = p;
             break;
         }
+    }
+
+    if (port.isNull() || !uart.begin(port)){
+        qDebug() << "Ошибка открытия COM порта...";
+        return;
     }
 
     if (!flashBootloader_sync()){
@@ -65,12 +70,16 @@ void Programmer::start()
         return;
     }
 
-//    if (m_erase.GetCheck() == BST_CHECKED)
-//        if(!Erase())
-//            return;
-    if (optionChecked(ProgrammerOptions::Programm))
-        if (!flashProgram_load())
+    if (optionChecked(ProgrammerOptions::Erase)){
+        if (!flashProgram_erase()){
             return;
+        }
+    }
+    if (optionChecked(ProgrammerOptions::Programm)){
+        if (!flashProgram_load()){
+            return;
+        }
+    }
 //    if (m_verify.GetCheck() == BST_CHECKED)
 //        if(!Verify())
 //            return;
@@ -114,14 +123,19 @@ bool Programmer::flashBootloader_switchSpeed()
 
     txdbuf.resize(5);
     txdbuf[0] = 'B';
-    txdbuf[1] = 0x0;
+    txdbuf[1] = 0x00;
     txdbuf[2] = (char)0xc2;
     txdbuf[3] = 0x01;
-    txdbuf[4] = 0x0;
-    uart.clearRXBuffer();
-    uart.writeAndReceive(txdbuf,1);
+    txdbuf[4] = 0x00;
+//    txdbuf[1] = 0x00;
+//    txdbuf[2] = (char)0x84;
+//    txdbuf[3] = 0x03;
+//    txdbuf[4] = 0x00;
 
-    uart.setBaudRate(QSerialPort::BaudRate::Baud115200);
+    uart.clearRXBuffer();
+    uart.writeAndReceive(txdbuf, 1);
+
+    uart.setBaudRate(115200 * 1);
 
     txdbuf.resize(1);
     txdbuf[0] = 0xd;
@@ -264,6 +278,37 @@ bool Programmer::flashBootloader_identify()
 
     qDebug() << "Завершил идентификацию загрузчика.";
     return true;
+}
+
+bool Programmer::flashProgram_erase()
+{
+    qDebug() << "Начал полную очистку памяти.";
+
+    txdbuf.resize(1);
+    txdbuf[0] = 'E';
+    uart.clearRXBuffer();
+    bool received = uart.writeAndReceive(txdbuf, 9);
+
+    if	(!received || uart.getByte(0) != 'E'){
+        qDebug() << "Ошибка очистки памяти!";
+        uart.end();
+        return false;
+    }
+
+    uint32_t adr = (BYTE)uart.getByte(1) + (((BYTE)uart.getByte(2)) << 8) + (((BYTE)uart.getByte(3)) << 16)
+        + (((BYTE)uart.getByte(4)) << 24);
+    uint32_t data = (BYTE)uart.getByte(5) + (((BYTE)uart.getByte(6)) << 8) + (((BYTE)uart.getByte(7)) << 16)
+        + (((BYTE)uart.getByte(8)) << 24);
+
+    if ((adr == 0x08020000) && (data == 0xffffffff)){
+        qDebug() << "Завершил полную очистку памяти.";
+        return true;
+    }
+    else{
+        qDebug() << "Ошибка очистки памяти!";
+        uart.end();
+        return false;
+    }
 }
 
 bool Programmer::flashProgram_load()

@@ -11,8 +11,7 @@ class UART : public QObject
 {
     Q_OBJECT
 private:
-
-    static const int write_delay = 1;
+    int write_delay = 1;
 
     QSerialPort* serial = nullptr;
 
@@ -34,7 +33,9 @@ public:
 
     void end();
 
-    void setBaudRate(QSerialPort::BaudRate rate);
+    void setBaudRate(qint32 rate);
+
+    int getEventLoopDelay();
 
     bool write(char byte);
 

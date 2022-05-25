@@ -57,6 +57,8 @@ private:
 
     bool flashBootloader_identify();
 
+    bool flashProgram_erase();
+
     bool flashProgram_load();
 
     bool flashProgram_run();
