@@ -349,7 +349,7 @@ bool Programmer::flashProgram_load()
             return false;
         }
 
-        qDebug() << "Прогресс загрузки: " << ((double)(i + 1) / (double)(flashParser.getProgram_il() >> 8)) * 100.0 << "%.";
+        qDebug() << "Прогресс загрузки: " << (int)(((double)(i + 1) / (double)(flashParser.getProgram_il() >> 8)) * 100.0) << "%.";
     }
 
     qDebug() << "Завершил загрузку основной программы.";
@@ -390,16 +390,16 @@ bool Programmer::flashProgram_verify()
             for (int k = 0; k < 8; k++){
                 if ((BYTE)uart.getByte(k) != (BYTE)flashParser.getProgram_buffer().at(k + (j << 3) + (i << 8))){
                     qDebug() << "Ошибка при проверке основной программы!";
-                    qDebug() << "Адрес:" << QString::number(0x08000000 + k + (j << 3) + (i << 8), 16)
-                             << ". Записано:" << QString::number((BYTE)flashParser.getProgram_buffer().at(k + (j << 3) + (i << 8)), 16)
-                             << ". Прочитано:" << QString::number((BYTE)ramParser.getProgram_buffer().at(k), 16)
+                    qDebug() << "Адрес:" << QString("0x").append(QString::number(0x08000000 + k + (j << 3) + (i << 8), 16))
+                             << ". Записано:" << QString("0x").append(QString::number((BYTE)flashParser.getProgram_buffer().at(k + (j << 3) + (i << 8)), 16))
+                             << ". Прочитано:" << QString("0x").append(QString::number((BYTE)ramParser.getProgram_buffer().at(k), 16))
                              << ".";
                     uart.end();
                     return false;
                 }
             }
         }
-        qDebug() << "Прогресс проверки: " << ((double)(i + 1) / (double)(flashParser.getProgram_il() >> 8)) * 100.0 << "%.";
+        qDebug() << "Прогресс проверки: " << (int)(((double)(i + 1) / (double)(flashParser.getProgram_il() >> 8)) * 100.0) << "%.";
     }
 
     qDebug() << "Завершил проверку основной программы.";
