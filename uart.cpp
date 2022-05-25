@@ -94,11 +94,16 @@ bool UART::write(char byte)
 
 bool UART::writeAndReceive(QByteArray buffer, int waitRXBytes)
 {
-    int time = 0;
-    int timeout = waitRXBytes * 100000;
+    uint64_t time = 0;
+    int ratio = serial->baudRate() / 115200;
+    if (ratio <= 0){
+        ratio = 1;
+    }
+    uint64_t timeout = waitRXBytes * 80000 / ratio;
 
     serial->write(buffer);
     serial->waitForReadyRead(write_delay);
+    time += write_delay;
 
     while (time < timeout && rx_buffer_index < waitRXBytes){
         QThread::currentThread()->usleep(getEventLoopDelay());

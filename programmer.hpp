@@ -34,7 +34,7 @@ private:
 
     QByteArray txdbuf;
 
-    ProgrammerOptions options;
+    ProgrammerOptions options = ::None;
 
 public:
     explicit Programmer(QObject *parent = nullptr);

@@ -31,7 +31,7 @@ Programmer::Programmer(QObject *parent)
 
 //    this->checkOption(ProgrammerOptions::Erase);
     this->checkOption(ProgrammerOptions::Programm);
-    this->checkOption(ProgrammerOptions::Verify);
+//    this->checkOption(ProgrammerOptions::Verify);
     this->checkOption(ProgrammerOptions::Run);
 }
 
@@ -121,23 +121,30 @@ bool Programmer::flashBootloader_sync()
 
 bool Programmer::flashBootloader_switchSpeed()
 {
-    qDebug() << "Начал установку скорости обмена 115200 бод.";
+    qDebug() << "Начал установку скорости обмена " << 115200 * 2 << " бод!";
 
     txdbuf.resize(5);
     txdbuf[0] = 'B';
-    txdbuf[1] = 0x00;
-    txdbuf[2] = (char)0xc2;
-    txdbuf[3] = 0x01;
-    txdbuf[4] = 0x00;
+
 //    txdbuf[1] = 0x00;
-//    txdbuf[2] = (char)0x84;
-//    txdbuf[3] = 0x03;
+//    txdbuf[2] = (char)0xc2;
+//    txdbuf[3] = 0x01;
+//    txdbuf[4] = 0x00;
+
+    txdbuf[1] = 0x00;
+    txdbuf[2] = (char)0x84;
+    txdbuf[3] = 0x03;
+    txdbuf[4] = 0x00;
+
+//    txdbuf[1] = 0x00;
+//    txdbuf[2] = (char)0x08;
+//    txdbuf[3] = 0x07;
 //    txdbuf[4] = 0x00;
 
     uart.clearRXBuffer();
     uart.writeAndReceive(txdbuf, 1);
 
-    uart.setBaudRate(115200 * 1);
+    uart.setBaudRate(115200 * 2);
 
     txdbuf.resize(1);
     txdbuf[0] = 0xd;
@@ -145,12 +152,12 @@ bool Programmer::flashBootloader_switchSpeed()
     uart.writeAndReceive(txdbuf, 3);
 
     if	(uart.getByte(0) != 0xd || uart.getByte(1) != 0xa || uart.getByte(2) != 0x3e){
-        qDebug() << "Ошибка установки скорости обмена 115200 бод!";
+        qDebug() << "Ошибка установки скорости обмена " << 115200 * 2 << " бод!";
         uart.end();
         return false;
     }
 
-    qDebug() << "Закончил установку скорости обмена 115200 бод.";
+    qDebug() << "Закончил установку скорости обмена " << 115200 * 2 << " бод!";
     return true;
 }
 
@@ -349,7 +356,7 @@ bool Programmer::flashProgram_load()
             return false;
         }
 
-        qDebug() << "Прогресс загрузки: " << (int)(((double)(i + 1) / (double)(flashParser.getProgram_il() >> 8)) * 100.0) << "%.";
+//        qDebug() << "Прогресс загрузки: " << (int)(((double)(i + 1) / (double)(flashParser.getProgram_il() >> 8)) * 100.0) << "%.";
     }
 
     qDebug() << "Завершил загрузку основной программы.";
@@ -399,7 +406,8 @@ bool Programmer::flashProgram_verify()
                 }
             }
         }
-        qDebug() << "Прогресс проверки: " << (int)(((double)(i + 1) / (double)(flashParser.getProgram_il() >> 8)) * 100.0) << "%.";
+
+//        qDebug() << "Прогресс проверки: " << (int)(((double)(i + 1) / (double)(flashParser.getProgram_il() >> 8)) * 100.0) << "%.";
     }
 
     qDebug() << "Завершил проверку основной программы.";
