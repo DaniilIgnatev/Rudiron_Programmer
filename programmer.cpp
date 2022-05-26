@@ -95,6 +95,11 @@ void Programmer::start()
     uart.end();
 }
 
+int Programmer::getSpeed()
+{
+    return 14400 * speedMultiplier;
+}
+
 bool Programmer::flashBootloader_sync()
 {
     qDebug() << "Начал синхронизацию.";
@@ -121,20 +126,27 @@ bool Programmer::flashBootloader_sync()
 
 bool Programmer::flashBootloader_switchSpeed()
 {
-    qDebug() << "Начал установку скорости обмена " << 115200 * 2 << " бод!";
+    qDebug() << "Начал установку скорости обмена " << getSpeed() << " бод!";
+
+    u_int32_t speed = getSpeed();
 
     txdbuf.resize(5);
     txdbuf[0] = 'B';
+
+    txdbuf[1] = *((BYTE*)&speed + 0);
+    txdbuf[2] = *((BYTE*)&speed + 1);
+    txdbuf[3] = *((BYTE*)&speed + 2);
+    txdbuf[4] = *((BYTE*)&speed + 3);
 
 //    txdbuf[1] = 0x00;
 //    txdbuf[2] = (char)0xc2;
 //    txdbuf[3] = 0x01;
 //    txdbuf[4] = 0x00;
 
-    txdbuf[1] = 0x00;
-    txdbuf[2] = (char)0x84;
-    txdbuf[3] = 0x03;
-    txdbuf[4] = 0x00;
+//    txdbuf[1] = 0x00;
+//    txdbuf[2] = (char)0x84;
+//    txdbuf[3] = 0x03;
+//    txdbuf[4] = 0x00;
 
 //    txdbuf[1] = 0x00;
 //    txdbuf[2] = (char)0x08;
@@ -144,7 +156,7 @@ bool Programmer::flashBootloader_switchSpeed()
     uart.clearRXBuffer();
     uart.writeAndReceive(txdbuf, 1);
 
-    uart.setBaudRate(115200 * 2);
+    uart.setBaudRate(getSpeed());
 
     txdbuf.resize(1);
     txdbuf[0] = 0xd;
@@ -152,12 +164,12 @@ bool Programmer::flashBootloader_switchSpeed()
     uart.writeAndReceive(txdbuf, 3);
 
     if	(uart.getByte(0) != 0xd || uart.getByte(1) != 0xa || uart.getByte(2) != 0x3e){
-        qDebug() << "Ошибка установки скорости обмена " << 115200 * 2 << " бод!";
+        qDebug() << "Ошибка установки скорости обмена " << getSpeed() << " бод!";
         uart.end();
         return false;
     }
 
-    qDebug() << "Закончил установку скорости обмена " << 115200 * 2 << " бод!";
+    qDebug() << "Закончил установку скорости обмена " << getSpeed() << " бод!";
     return true;
 }
 

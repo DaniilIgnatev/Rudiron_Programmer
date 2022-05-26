@@ -71,7 +71,7 @@ void UART::setBaudRate(qint32 rate)
 
 int UART::getEventLoopDelay()
 {
-    return 1000 * 115200 / serial->baudRate();
+    return 8000 / serial->baudRate() / 14400;
 }
 
 void UART::errorSlot(QSerialPort::SerialPortError error){
@@ -95,11 +95,11 @@ bool UART::write(char byte)
 bool UART::writeAndReceive(QByteArray buffer, int waitRXBytes)
 {
     uint64_t time = 0;
-    int ratio = serial->baudRate() / 115200;
+    int ratio = serial->baudRate() / 14400;
     if (ratio <= 0){
         ratio = 1;
     }
-    uint64_t timeout = waitRXBytes * 80000 / ratio;
+    uint64_t timeout = waitRXBytes * 640000 / ratio;
 
     serial->write(buffer);
     serial->waitForReadyRead(write_delay);

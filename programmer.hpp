@@ -36,12 +36,17 @@ private:
 
     ProgrammerOptions options = ::None;
 
+    ///baud rate = 14400 * speedMultiplier. Допускаются значения: 1, 2, 4, 8, 16
+    int speedMultiplier = 16;
+
 public:
     explicit Programmer(QObject *parent = nullptr);
 
     void start();
 
 private:
+
+    int getSpeed();
 
     void sync();
 
