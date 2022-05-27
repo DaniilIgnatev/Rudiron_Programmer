@@ -6,17 +6,10 @@
 #include <QList>
 #include <QSerialPortInfo>
 
+#include "programmerarguments.h"
+
 #include "hexramparser.hpp"
 #include "hexflashparser.hpp"
-
-
-enum ProgrammerOptions{
-    None = 0,
-    Erase = 1,
-    Programm = 2,
-    Verify = 4,
-    Run = 8
-};
 
 
 class Programmer : public QObject
@@ -26,21 +19,21 @@ private:
     UART uart;
 
     const QString id_str = "1986BOOTUART";
-    QString bootloader_path = "/Users/daniilignatev/GitHub/RudironProgrammer/1986_BOOT_UART.hex";
-    QString programm_path = "/Users/daniilignatev/GitHub/RudironProgrammer/RudironDiagnostics.hex";
+    QString bootloader_path;
+    QString programm_path;
 
     HEXRAMParser ramParser;
     HexFlashParser flashParser;
 
     QByteArray txdbuf;
 
-    ProgrammerOptions options = ::None;
+    ProgrammerOptions options;
 
     ///baud rate = 14400 * speedMultiplier. Допускаются значения: 1, 2, 4, 8, 16
-    int speedMultiplier = 16;
+    int speedMultiplier = 1;
 
 public:
-    explicit Programmer(QObject *parent = nullptr);
+    explicit Programmer(ProgrammerArguments arguments, QObject *parent = nullptr);
 
     void start();
 
@@ -73,9 +66,8 @@ private:
 public:
 
     ProgrammerOptions getOptions() const;
-    bool optionChecked(ProgrammerOptions option);
+
     void setOptions(ProgrammerOptions newOptions);
-    void checkOption(ProgrammerOptions option);
 
 signals:
 

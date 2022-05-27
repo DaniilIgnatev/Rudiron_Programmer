@@ -5,22 +5,12 @@ ProgrammerOptions Programmer::getOptions() const
     return options;
 }
 
-bool Programmer::optionChecked(ProgrammerOptions option)
-{
-    return (bool)((int)options & (int)option);
-}
-
 void Programmer::setOptions(ProgrammerOptions newOptions)
 {
     options = newOptions;
 }
 
-void Programmer::checkOption(ProgrammerOptions option)
-{
-    this->options = (ProgrammerOptions)((int)options | (int)option);
-}
-
-Programmer::Programmer(QObject *parent)
+Programmer::Programmer(ProgrammerArguments arguments, QObject *parent)
     : QObject{parent}
 {
     ramParser.setHexPath(this->bootloader_path);
@@ -29,10 +19,8 @@ Programmer::Programmer(QObject *parent)
     flashParser.setHexPath(this->programm_path);
     flashParser.initialize();
 
-//    this->checkOption(ProgrammerOptions::Erase);
-    this->checkOption(ProgrammerOptions::Programm);
-//    this->checkOption(ProgrammerOptions::Verify);
-    this->checkOption(ProgrammerOptions::Run);
+    speedMultiplier = 1;
+    options = arguments.options;
 }
 
 void Programmer::start()
@@ -71,22 +59,22 @@ void Programmer::start()
         return;
     }
 
-    if (optionChecked(ProgrammerOptions::Erase)){
+    if (options.checked(ProgrammerOptionsEnum::Erase)){
         if (!flashProgram_erase()){
             return;
         }
     }
-    if (optionChecked(ProgrammerOptions::Programm)){
+    if (options.checked(ProgrammerOptionsEnum::Programm)){
         if (!flashProgram_load()){
             return;
         }
     }
-    if (optionChecked(ProgrammerOptions::Verify)){
+    if (options.checked(ProgrammerOptionsEnum::Verify)){
         if (!flashProgram_verify()){
             return;
         }
     }
-    if (optionChecked(ProgrammerOptions::Run)){
+    if (options.checked(ProgrammerOptionsEnum::Run)){
         if (!flashProgram_run()){
             return;
         }
@@ -368,7 +356,10 @@ bool Programmer::flashProgram_load()
             return false;
         }
 
-//        qDebug() << "Прогресс загрузки: " << (int)(((double)(i + 1) / (double)(flashParser.getProgram_il() >> 8)) * 100.0) << "%.";
+        int progress = (int)(((double)(i + 1) / (double)(flashParser.getProgram_il() >> 8)) * 100.0);
+        if (progress % 10 == 0){
+            qDebug() << "Прогресс загрузки: " << progress << "%.";
+        }
     }
 
     qDebug() << "Завершил загрузку основной программы.";
@@ -419,7 +410,10 @@ bool Programmer::flashProgram_verify()
             }
         }
 
-//        qDebug() << "Прогресс проверки: " << (int)(((double)(i + 1) / (double)(flashParser.getProgram_il() >> 8)) * 100.0) << "%.";
+        int progress = (int)(((double)(i + 1) / (double)(flashParser.getProgram_il() >> 8)) * 100.0);
+        if (progress % 10 == 0){
+            qDebug() << "Прогресс проверки: " << progress << "%.";
+        }
     }
 
     qDebug() << "Завершил проверку основной программы.";

@@ -1,14 +1,19 @@
 #include <QCoreApplication>
+#include "argumentsparser.h"
 #include "programmer.hpp"
-#include <QtSerialPort>
 
 
 int main(int argc, char *argv[])
 {
     QCoreApplication a(argc, argv);
+    QCoreApplication::setApplicationName("RudironProgrammer");
+    QCoreApplication::setApplicationVersion("1.0");
 
-    Programmer programmer;
-    programmer.start();
+    ArgumentsParser parser;
+    ProgrammerArguments arguments = parser.processProgrammerArguments(a);
+
+    Programmer *programmer = new Programmer(arguments);
+    programmer->start();
 
     return a.exec();
 }
