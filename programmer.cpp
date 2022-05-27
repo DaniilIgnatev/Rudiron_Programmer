@@ -64,7 +64,7 @@ void Programmer::start()
             return;
         }
     }
-    if (options.checked(ProgrammerOptionsEnum::Programm)){
+    if (options.checked(ProgrammerOptionsEnum::Load)){
         if (!flashProgram_load()){
             return;
         }

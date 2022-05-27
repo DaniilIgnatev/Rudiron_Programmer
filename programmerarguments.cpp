@@ -1,12 +1,12 @@
 #include "programmerarguments.h"
 
 
-bool ProgrammerOptions::optionChecked(ProgrammerOptionsEnum option)
+bool ProgrammerOptions::checked(ProgrammerOptionsEnum option)
 {
-    return (bool)((int)options & (int)option);
+    return (bool)((int)value & (int)option);
 }
 
-void ProgrammerOptions::checkOption(ProgrammerOptionsEnum option)
+void ProgrammerOptions::check(ProgrammerOptionsEnum option)
 {
-    this->options = (ProgrammerOptionsEnum)((int)options | (int)option);
+    this->value = (ProgrammerOptionsEnum)((int)value | (int)option);
 }
