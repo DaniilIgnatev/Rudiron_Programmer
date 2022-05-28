@@ -83,16 +83,22 @@ void UART::errorSlot(QSerialPort::SerialPortError error){
     }
 }
 
-bool UART::write(char byte)
+bool UART::write(char byte, bool read, int repeatTimes)
 {
-    serial->write(QByteArray(1, byte));
-    QThread::currentThread()->msleep(2);
-    bool written = serial->waitForBytesWritten(write_delay * 2);
+    for (int i = 0; i < repeatTimes; i++){
+        serial->write(QByteArray(1, byte));
+        serial->waitForBytesWritten(1);
+    }
 
-    return written;
+    if (read){
+        return serial->waitForReadyRead(1);
+    }
+    else{
+        return true;
+    }
 }
 
-bool UART::writeAndReceive(QByteArray buffer, int waitRXBytes)
+bool UART::write(QByteArray buffer, int waitRXBytes)
 {
     uint64_t time = 0;
     int ratio = serial->baudRate() / 14400;
@@ -102,13 +108,13 @@ bool UART::writeAndReceive(QByteArray buffer, int waitRXBytes)
     uint64_t timeout = waitRXBytes * 640000 / ratio;
 
     serial->write(buffer);
-    serial->waitForReadyRead(write_delay);
-    time += write_delay;
+    serial->waitForReadyRead(read_delay);
+    time += read_delay;
 
     while (time < timeout && rx_buffer_index < waitRXBytes){
         QThread::currentThread()->usleep(getEventLoopDelay());
-        serial->waitForReadyRead(write_delay);
-        time += write_delay * 1000 + getEventLoopDelay();
+        serial->waitForReadyRead(read_delay);
+        time += read_delay * 1000 + getEventLoopDelay();
     }
 
     return time <= timeout && rx_buffer_index >= waitRXBytes;

@@ -11,7 +11,7 @@ class UART : public QObject
 {
     Q_OBJECT
 private:
-    int write_delay = 1;
+    int read_delay = 1;
 
     QSerialPort* serial = nullptr;
 
@@ -37,9 +37,9 @@ public:
 
     int getEventLoopDelay();
 
-    bool write(char byte);
+    bool write(char byte, bool read = true, int times = 1);
 
-    bool writeAndReceive(QByteArray buffer, int waitRXBytes);
+    bool write(QByteArray buffer, int readBytes);
 
     int readByte();
 

@@ -9,6 +9,10 @@ ArgumentsParser::ArgumentsParser(QObject *parent) : QObject(parent)
     parser.addPositionalArgument("bootloader", "Полный путь до загрузчика.");
     parser.addPositionalArgument("program", "Полный путь до загружаемой программы пользователя.");
 
+    ///Опция W wait. Ожидает нажатия клавиши для закрытия
+
+    /// Опция C com. Принудительно задает имя COM-порта.
+
     ///Опция показа прогресса загрузки и проверки программы в ПЗУ
     QCommandLineOption showProgressOption(QStringList() << showProgressOption_short << showProgressOption_long,
                                    "Показывать прогресс загрузки и верификации программы пользователя.");
