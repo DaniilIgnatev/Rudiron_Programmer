@@ -141,7 +141,7 @@ bool Programmer::flashBootloader_switchSpeed()
 
     qDebug() << QDateTime::currentDateTime().currentMSecsSinceEpoch();
     uart.clearRXBuffer();
-    uart.write(txdbuf, 1);
+    uart.write(txdbuf, 0);//АНОМАЛЬНО БОЛЬШАЯ ЗАДЕРЖКА! 700МС!
 
     qDebug() << QDateTime::currentDateTime().currentMSecsSinceEpoch();
 
