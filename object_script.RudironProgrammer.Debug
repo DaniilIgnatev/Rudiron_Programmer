@@ -1,0 +1,14 @@
+debug/argumentsparser.o
+debug/hexflashparser.o
+debug/hexparser.o
+debug/hexramparser.o
+debug/main.o
+debug/programmer.o
+debug/programmerarguments.o
+debug/uart.o
+debug/moc_argumentsparser.o
+debug/moc_hexflashparser.o
+debug/moc_hexparser.o
+debug/moc_hexramparser.o
+debug/moc_programmer.o
+debug/moc_uart.o

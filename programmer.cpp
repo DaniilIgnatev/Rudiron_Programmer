@@ -34,7 +34,7 @@ Programmer::Programmer(ProgrammerArguments arguments, QObject *parent)
 void Programmer::start()
 {
     if (!initialized){
-        qDebug() << "Программа запущена с некорректными аргументами! Выход.";
+        qDebug() << "Программа запущена с некорректными аргументами! Завершение работы.";
         return;
     }
 
