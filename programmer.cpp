@@ -141,20 +141,15 @@ bool Programmer::flashBootloader_switchSpeed()
 
     qDebug() << QDateTime::currentDateTime().currentMSecsSinceEpoch();
     uart.clearRXBuffer();
-    uart.write(txdbuf, 0);//АНОМАЛЬНО БОЛЬШАЯ ЗАДЕРЖКА! 700МС!
-
+    uart.write(txdbuf, 0);
     qDebug() << QDateTime::currentDateTime().currentMSecsSinceEpoch();
 
     uart.setBaudRate(getSpeed());
-
-    qDebug() << QDateTime::currentDateTime().currentMSecsSinceEpoch();
 
     txdbuf.resize(1);
     txdbuf[0] = 0xd;
     uart.clearRXBuffer();
     uart.write(txdbuf, 3);
-
-    qDebug() << QDateTime::currentDateTime().currentMSecsSinceEpoch();
 
     if	(uart.getByte(0) != 0xd || uart.getByte(1) != 0xa || uart.getByte(2) != 0x3e){
         qDebug() << "Ошибка установки скорости обмена " << getSpeed() << " бод!";
@@ -163,8 +158,6 @@ bool Programmer::flashBootloader_switchSpeed()
     }
 
     qDebug() << "Закончил установку скорости обмена " << getSpeed() << " бод!";
-
-    qDebug() << QDateTime::currentDateTime().currentMSecsSinceEpoch();
     return true;
 }
 
@@ -300,7 +293,7 @@ bool Programmer::flashProgram_erase()
     txdbuf.resize(1);
     txdbuf[0] = 'E';
     uart.clearRXBuffer();
-    bool received = uart.write(txdbuf, 9);
+    bool received = uart.write(txdbuf, 9, 2000000);
 
     if	(!received || uart.getByte(0) != 'E'){
         qDebug() << "Ошибка очистки памяти!";

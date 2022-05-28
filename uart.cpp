@@ -108,7 +108,7 @@ bool UART::write(char byte, bool read, int repeatTimes)
 //    }
 }
 
-bool UART::write(QByteArray buffer, int waitRXBytes)
+bool UART::write(QByteArray buffer, int waitRXBytes, int forceTimeout)
 {
     if (waitRXBytes > 0){
         uint64_t time = 0;
@@ -117,7 +117,11 @@ bool UART::write(QByteArray buffer, int waitRXBytes)
         if (ratio <= 0){
             ratio = 1;
         }
-        uint64_t timeout = waitRXBytes * 640000 / ratio;
+
+        uint64_t timeout = forceTimeout;
+        if (timeout == 0){
+            timeout = waitRXBytes * 640000 / ratio;
+        }
 
         serial->write(buffer);
         serial->waitForReadyRead(read_delay);

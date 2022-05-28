@@ -39,7 +39,7 @@ public:
 
     bool write(char byte, bool read = true, int times = 1);
 
-    bool write(QByteArray buffer, int readBytes);
+    bool write(QByteArray buffer, int readBytes, int forceTimeout = 0);
 
     int readByte();
 
