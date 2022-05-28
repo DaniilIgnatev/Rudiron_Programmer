@@ -87,8 +87,8 @@ bool UART::write(char byte, bool read, int repeatTimes)
 {
     for (int i = 0; i < repeatTimes; i++){
         serial->write(QByteArray(1, byte));
-        serial->waitForBytesWritten(1);
     }
+    serial->waitForBytesWritten(repeatTimes);
 
     if (read){
         return serial->waitForReadyRead(1);
@@ -100,7 +100,8 @@ bool UART::write(char byte, bool read, int repeatTimes)
 
 bool UART::write(QByteArray buffer, int waitRXBytes)
 {
-    uint64_t time = 0;
+    uint64_t time = 1;
+
     int ratio = serial->baudRate() / 14400;
     if (ratio <= 0){
         ratio = 1;

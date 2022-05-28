@@ -140,6 +140,7 @@ bool Programmer::flashBootloader_switchSpeed()
     txdbuf[4] = *((BYTE*)&speed + 3);
 
     uart.clearRXBuffer();
+    QThread::currentThread()->msleep(10);
     uart.write(txdbuf, 1);
 
     uart.setBaudRate(getSpeed());

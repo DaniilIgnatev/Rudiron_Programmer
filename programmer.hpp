@@ -5,6 +5,7 @@
 #include "uart.hpp"
 #include <QList>
 #include <QSerialPortInfo>
+#include <QThread>
 
 #include "programmerarguments.h"
 
