@@ -16,21 +16,16 @@ class Programmer : public QObject
 {
     Q_OBJECT
 private:
-    UART uart;
-
     const QString id_str = "1986BOOTUART";
-    QString bootloader_path;
-    QString programm_path;
+
+    bool initialized = false;
+    ProgrammerArguments arguments;
+
+    UART uart;
+    QByteArray txdbuf;
 
     HEXRAMParser ramParser;
     HexFlashParser flashParser;
-
-    QByteArray txdbuf;
-
-    ProgrammerOptions options;
-
-    ///baud rate = 14400 * speedMultiplier. Допускаются значения: 1, 2, 4, 8, 16
-    int speedMultiplier = 1;
 
 public:
     explicit Programmer(ProgrammerArguments arguments, QObject *parent = nullptr);
@@ -65,9 +60,7 @@ private:
 
 public:
 
-    ProgrammerOptions getOptions() const;
-
-    void setOptions(ProgrammerOptions newOptions);
+    bool getInitialized() const;
 
 signals:
 

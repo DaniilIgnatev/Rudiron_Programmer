@@ -7,16 +7,16 @@ int main(int argc, char *argv[])
 {
     int argc2 = 10;
     char** argv2 = new char*[argc2];
-    argv2[0] = (char*)"/Users/daniilignatev/GitHub/build-RudironProgrammer-Desktop_Qt_5_12_12_clang_64bit-Debug/RudironProgrammer";
-    argv2[1] = (char*)"Hello";
-    argv2[2] = (char*)"World";
+    argv2[0] = (char*)"C:/Users/daniil/Documents/GitHub/build-RudironProgrammer-Qt_5_12_10_msvc2017_64-Debug/debug/RudironProgrammer.exe";
+    argv2[1] = (char*)"C:/Users/daniil/YandexDisk/Documents/Rudiron/Distributive/components/win_x64/RudironDistributive/tools/UART programmer/1986UARTWSD/1986_BOOT_UART.hex";
+    argv2[2] = (char*)"C:/Users/daniil/YandexDisk/Documents/Rudiron/Distributive/components/win_x64/RudironDistributive/tools/UART programmer/1986UARTWSD/RudironDiagnostics.hex";
     argv2[3] = (char*)"-P";
     argv2[4] = (char*)"-E";
     argv2[5] = (char*)"-L";
     argv2[6] = (char*)"-V";
     argv2[7] = (char*)"-R";
     argv2[8] = (char*)"-S";
-    argv2[9] = (char*)"2";
+    argv2[9] = (char*)"16";
 
     QCoreApplication a(argc2, argv2);
     QCoreApplication::setApplicationName("RudironProgrammer");

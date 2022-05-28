@@ -17,7 +17,9 @@ BOOL HEXRAMParser::initialize(void)
     }
 
     QFile file(hexFilePath);
-    file.open(QIODevice::ReadWrite);
+    if (!file.open(QIODevice::ReadWrite)){
+        return false;
+    }
 
     int nb = 1;
     char chd;
@@ -68,5 +70,5 @@ BOOL HEXRAMParser::initialize(void)
         }
     }
 
-    return 0;
+    return true;
 }

@@ -1,30 +1,43 @@
 #include "programmer.hpp"
 
-ProgrammerOptions Programmer::getOptions() const
-{
-    return options;
-}
 
-void Programmer::setOptions(ProgrammerOptions newOptions)
+bool Programmer::getInitialized() const
 {
-    options = newOptions;
+    return initialized;
 }
 
 Programmer::Programmer(ProgrammerArguments arguments, QObject *parent)
     : QObject{parent}
 {
-    ramParser.setHexPath(this->bootloader_path);
-    ramParser.initialize();
+    initialized = true;
 
-    flashParser.setHexPath(this->programm_path);
-    flashParser.initialize();
+    ramParser.setHexPath(arguments.bootloaderPath);
+    if (!ramParser.initialize()){
+        qDebug() << "Ошибка чтения файла загрузчика " << arguments.bootloaderPath;
+        initialized = false;
+    }
 
-    speedMultiplier = 1;
-    options = arguments.options;
+    flashParser.setHexPath(arguments.programPath);
+    if (!flashParser.initialize()){
+        qDebug() << "Ошибка чтения файла программы " << arguments.programPath;
+        initialized = false;
+    }
+
+    if (!((arguments.speedMultiplier % 2 == 0) && (arguments.speedMultiplier >= 1 && arguments.speedMultiplier <= 16))){
+        qDebug() << "Некорректное значение умножителя частоты обмена " << arguments.speedMultiplier;
+        initialized = false;
+    }
+
+    this->arguments = arguments;
 }
 
 void Programmer::start()
 {
+    if (!initialized){
+        qDebug() << "Программа запущена с некорректными аргументами! Выход.";
+        return;
+    }
+
     auto ports = QSerialPortInfo::availablePorts();
     QSerialPortInfo port;
 
@@ -36,7 +49,7 @@ void Programmer::start()
     }
 
     if (port.isNull() || !uart.begin(port)){
-        qDebug() << "Ошибка открытия COM порта...";
+        qDebug() << "Ошибка открытия COM порта.";
         return;
     }
 
@@ -59,22 +72,22 @@ void Programmer::start()
         return;
     }
 
-    if (options.checked(ProgrammerOptionsEnum::Erase)){
+    if (arguments.options.checked(ProgrammerOptionsEnum::Erase)){
         if (!flashProgram_erase()){
             return;
         }
     }
-    if (options.checked(ProgrammerOptionsEnum::Load)){
+    if (arguments.options.checked(ProgrammerOptionsEnum::Load)){
         if (!flashProgram_load()){
             return;
         }
     }
-    if (options.checked(ProgrammerOptionsEnum::Verify)){
+    if (arguments.options.checked(ProgrammerOptionsEnum::Verify)){
         if (!flashProgram_verify()){
             return;
         }
     }
-    if (options.checked(ProgrammerOptionsEnum::Run)){
+    if (arguments.options.checked(ProgrammerOptionsEnum::Run)){
         if (!flashProgram_run()){
             return;
         }
@@ -85,7 +98,7 @@ void Programmer::start()
 
 int Programmer::getSpeed()
 {
-    return 14400 * speedMultiplier;
+    return 14400 * arguments.speedMultiplier;
 }
 
 bool Programmer::flashBootloader_sync()
@@ -116,7 +129,7 @@ bool Programmer::flashBootloader_switchSpeed()
 {
     qDebug() << "Начал установку скорости обмена " << getSpeed() << " бод!";
 
-    u_int32_t speed = getSpeed();
+    int speed = getSpeed();
 
     txdbuf.resize(5);
     txdbuf[0] = 'B';
