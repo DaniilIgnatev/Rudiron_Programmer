@@ -87,8 +87,15 @@ bool UART::write(char byte, bool read, int repeatTimes)
 {
     for (int i = 0; i < repeatTimes; i++){
         serial->write(QByteArray(1, byte));
+#ifndef _WIN32
+        serial->waitForReadyRead(1);
+        QThread::currentThread()->msleep(1);
+#endif
     }
+
+#ifdef _WIN32
     serial->waitForBytesWritten(repeatTimes);
+#endif
 
     if (read){
         return serial->waitForReadyRead(1);

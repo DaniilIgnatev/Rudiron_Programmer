@@ -139,16 +139,22 @@ bool Programmer::flashBootloader_switchSpeed()
     txdbuf[3] = *((BYTE*)&speed + 2);
     txdbuf[4] = *((BYTE*)&speed + 3);
 
+    qDebug() << QDateTime::currentDateTime().currentMSecsSinceEpoch();
     uart.clearRXBuffer();
-    QThread::currentThread()->msleep(10);
     uart.write(txdbuf, 1);
 
+    qDebug() << QDateTime::currentDateTime().currentMSecsSinceEpoch();
+
     uart.setBaudRate(getSpeed());
+
+    qDebug() << QDateTime::currentDateTime().currentMSecsSinceEpoch();
 
     txdbuf.resize(1);
     txdbuf[0] = 0xd;
     uart.clearRXBuffer();
     uart.write(txdbuf, 3);
+
+    qDebug() << QDateTime::currentDateTime().currentMSecsSinceEpoch();
 
     if	(uart.getByte(0) != 0xd || uart.getByte(1) != 0xa || uart.getByte(2) != 0x3e){
         qDebug() << "Ошибка установки скорости обмена " << getSpeed() << " бод!";
@@ -157,6 +163,8 @@ bool Programmer::flashBootloader_switchSpeed()
     }
 
     qDebug() << "Закончил установку скорости обмена " << getSpeed() << " бод!";
+
+    qDebug() << QDateTime::currentDateTime().currentMSecsSinceEpoch();
     return true;
 }
 

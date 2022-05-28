@@ -3,6 +3,7 @@
 
 #include "TypeDefs.hpp"
 
+
 enum ProgrammerOptionsEnum{
     None = 0,
     Erase = 1,
@@ -11,23 +12,25 @@ enum ProgrammerOptionsEnum{
     Run = 8
 };
 
+
 struct ProgrammerOptions{
 private:
-    ProgrammerOptionsEnum value;
+    ProgrammerOptionsEnum value = ::None;
 
 public:
     bool checked(ProgrammerOptionsEnum option);
     void check(ProgrammerOptionsEnum option);
 };
 
+
 struct ProgrammerArguments{
-    bool showProgress;
+    bool showProgress = false;
 
     QString bootloaderPath;
 
     QString programPath;
 
-    int speedMultiplier;
+    int speedMultiplier = 1;
 
     ProgrammerOptions options;
 };
