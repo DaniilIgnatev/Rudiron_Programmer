@@ -139,21 +139,6 @@ bool Programmer::flashBootloader_switchSpeed()
     txdbuf[3] = *((BYTE*)&speed + 2);
     txdbuf[4] = *((BYTE*)&speed + 3);
 
-//    txdbuf[1] = 0x00;
-//    txdbuf[2] = (char)0xc2;
-//    txdbuf[3] = 0x01;
-//    txdbuf[4] = 0x00;
-
-//    txdbuf[1] = 0x00;
-//    txdbuf[2] = (char)0x84;
-//    txdbuf[3] = 0x03;
-//    txdbuf[4] = 0x00;
-
-//    txdbuf[1] = 0x00;
-//    txdbuf[2] = (char)0x08;
-//    txdbuf[3] = 0x07;
-//    txdbuf[4] = 0x00;
-
     uart.clearRXBuffer();
     uart.writeAndReceive(txdbuf, 1);
 
@@ -350,6 +335,7 @@ bool Programmer::flashProgram_load()
     }
 
     // шагаем по памяти каждые 256 байт
+    int last_progress = 0;
     for (int i = 0; i < (flashParser.getProgram_il() >> 8); i++){
         uart.write('P');
 
@@ -370,8 +356,9 @@ bool Programmer::flashProgram_load()
         }
 
         int progress = (int)(((double)(i + 1) / (double)(flashParser.getProgram_il() >> 8)) * 100.0);
-        if (progress % 10 == 0){
+        if (arguments.showProgress && last_progress != progress && progress % 10 == 0){
             qDebug() << "Прогресс загрузки: " << progress << "%.";
+            last_progress = progress;
         }
     }
 
@@ -400,6 +387,7 @@ bool Programmer::flashProgram_verify()
 
     txdbuf.resize(1);
     txdbuf[0] = 'V';
+    int last_progress = 0;
     for (int i = 0;i < (flashParser.getProgram_il() >> 8); i++){
         for (int j = 0; j < 32; j++){
             uart.clearRXBuffer();
@@ -424,8 +412,9 @@ bool Programmer::flashProgram_verify()
         }
 
         int progress = (int)(((double)(i + 1) / (double)(flashParser.getProgram_il() >> 8)) * 100.0);
-        if (progress % 10 == 0){
+        if (arguments.showProgress && last_progress != progress && progress % 10 == 0){
             qDebug() << "Прогресс проверки: " << progress << "%.";
+            last_progress = progress;
         }
     }
 
