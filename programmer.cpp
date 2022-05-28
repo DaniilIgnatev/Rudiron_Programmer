@@ -107,7 +107,7 @@ bool Programmer::flashBootloader_sync()
     uart.clearRXBuffer();
 
     for(int i = 0; i < 512; i++){
-        uart.write(0x0, true, 15);
+        uart.write(0x0, 15);
 
         if (uart.getByte(0) == 0x0D && uart.getByte(1) == 0x0A && uart.getByte(2) == 0x3E) {
             break;
@@ -139,10 +139,8 @@ bool Programmer::flashBootloader_switchSpeed()
     txdbuf[3] = *((BYTE*)&speed + 2);
     txdbuf[4] = *((BYTE*)&speed + 3);
 
-    qDebug() << QDateTime::currentDateTime().currentMSecsSinceEpoch();
     uart.clearRXBuffer();
     uart.write(txdbuf, 0);
-    qDebug() << QDateTime::currentDateTime().currentMSecsSinceEpoch();
 
     uart.setBaudRate(getSpeed());
 
@@ -177,7 +175,7 @@ bool Programmer::flashBootloader_load()
     uart.clearRXBuffer();
     bool received = uart.write(txdbuf, 1);
 
-    if	(received && uart.getByte(0) != 'L'){
+    if	(!received || uart.getByte(0) != 'L'){
         qDebug() << "Ошибка загрузки бутлодера в начале!";
         uart.end();
         return false;
@@ -185,7 +183,7 @@ bool Programmer::flashBootloader_load()
 
     uart.clearRXBuffer();
     received = uart.write(ramParser.getProgramBuffer_notEmpty(), 1);
-    if	(received && uart.getByte(0) !='K'){
+    if	(received == false || uart.getByte(0) !='K'){
         qDebug() << "Ошибка загрузки бутлодера в конце!";
         uart.end();
         return false;
@@ -248,7 +246,7 @@ bool Programmer::flashBootloader_run()
     uart.clearRXBuffer();
     bool received = uart.write(txdbuf, 1);
 
-    if	(received && uart.getByte(0) != 'R'){
+    if	(!received || uart.getByte(0) != 'R'){
         qDebug() << "Ошибка запуска бутлодера!";
         uart.end();
         return false;
@@ -302,9 +300,9 @@ bool Programmer::flashProgram_erase()
     }
 
     uint32_t adr = (BYTE)uart.getByte(1) + (((BYTE)uart.getByte(2)) << 8) + (((BYTE)uart.getByte(3)) << 16)
-        + (((BYTE)uart.getByte(4)) << 24);
+            + (((BYTE)uart.getByte(4)) << 24);
     uint32_t data = (BYTE)uart.getByte(5) + (((BYTE)uart.getByte(6)) << 8) + (((BYTE)uart.getByte(7)) << 16)
-        + (((BYTE)uart.getByte(8)) << 24);
+            + (((BYTE)uart.getByte(8)) << 24);
 
     if ((adr == 0x08020000) && (data == 0xffffffff)){
         qDebug() << "Завершил полную очистку памяти.";
@@ -339,7 +337,7 @@ bool Programmer::flashProgram_load()
     // шагаем по памяти каждые 256 байт
     int last_progress = 0;
     for (int i = 0; i < (flashParser.getProgram_il() >> 8); i++){
-        uart.write('P', false);
+        uart.write('P');
 
         QByteArray block = flashParser.getProgram_buffer().mid(i << 8, 256);
 
@@ -349,7 +347,12 @@ bool Programmer::flashProgram_load()
         }
 
         uart.clearRXBuffer();
+
+#ifdef _WIN32
+        received = uart.write(block, 1, 2000);
+#else
         received = uart.write(block, 1);
+#endif
 
         if (!received || (BYTE)uart.getByte(0) != ks){
             qDebug() << "Ошибка загрузки основной программы!";

@@ -2,6 +2,8 @@
 #include <QThread>
 #include <QMetaEnum>
 
+#include <QCoreApplication>
+
 
 UART::UART(QObject *parent)
     : QObject{parent}
@@ -28,7 +30,7 @@ bool UART::begin(QSerialPortInfo port)
 {
     serial = new QSerialPort(port, this);
 
-    connect(serial, &QSerialPort::errorOccurred, this, &UART::errorSlot);
+    //    connect(serial, &QSerialPort::errorOccurred, this, &UART::errorSlot);
     connect(serial, &QSerialPort::readyRead, this, &UART::readyReadSlot);
 
     if (!serial->setBaudRate(QSerialPort::Baud9600, QSerialPort::AllDirections)){
@@ -83,33 +85,46 @@ void UART::errorSlot(QSerialPort::SerialPortError error){
     }
 }
 
-bool UART::write(char byte, bool read, int repeatTimes)
+bool UART::write(char byte, int repeatTimes)
 {
-//    for (int i = 0; i < repeatTimes; i++){
-//        serial->write(QByteArray(1, byte));
-//#ifndef _WIN32
-//        serial->waitForReadyRead(1);
-////        QThread::currentThread()->msleep(1);
-//#endif
-//    }
+#ifdef _WIN32
+    for (int i = 0; i < repeatTimes; i++){
+        serial->write(QByteArray(1, byte));
+    }
 
-//#ifdef _WIN32
-//    serial->waitForBytesWritten(repeatTimes);
-//#endif
-
+    serial->waitForBytesWritten();
+    readByte();
+    return true;
+#else
     serial->write(QByteArray(1, byte));
     return serial->waitForReadyRead(1);
-
-//    if (read){
-//        return serial->waitForReadyRead(1);
-//    }
-//    else{
-//        return true;
-//    }
+#endif
 }
 
 bool UART::write(QByteArray buffer, int waitRXBytes, int forceTimeout)
 {
+#ifdef _WIN32
+    serial->write(buffer);
+    serial->waitForBytesWritten(100);
+
+    if (forceTimeout){
+        serial->waitForReadyRead(forceTimeout / 1000);
+    }
+    else{
+        serial->waitForReadyRead(1);
+    }
+
+    if (waitRXBytes){
+        while (rx_buffer_index < waitRXBytes){
+            serial->waitForReadyRead(1);
+        }
+        while (rx_buffer_index > waitRXBytes) {
+            popByte();
+        }
+    }
+
+    return true;
+#else
     if (waitRXBytes > 0){
         uint64_t time = 0;
 
@@ -140,6 +155,7 @@ bool UART::write(QByteArray buffer, int waitRXBytes, int forceTimeout)
         serial->waitForReadyRead(10);
         return true;
     }
+#endif
 }
 
 int UART::readByte()
@@ -211,6 +227,8 @@ void UART::waitRead(int timeout)
 
 void UART::clearRXBuffer()
 {
+    QThread::currentThread()->msleep(1);
+    serial->clear();
     for (int i = 0; i < rx_buffer_index; i++){
         rx_buffer[i] = 0;
     }

@@ -37,7 +37,7 @@ public:
 
     int getEventLoopDelay();
 
-    bool write(char byte, bool read = true, int times = 1);
+    bool write(char byte, int times = 1);
 
     bool write(QByteArray buffer, int readBytes, int forceTimeout = 0);
 
