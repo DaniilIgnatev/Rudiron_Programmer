@@ -91,7 +91,9 @@ ProgrammerArguments ArgumentsParser::processProgrammerArguments(QCoreApplication
         arguments.portName = parser.value(portNameOption_name);
     }
 
-    arguments.speedMultiplier = parser.value(speedMultiplierOption_name).toInt();
+    if (parser.isSet(speedMultiplierOption_name)){
+        arguments.speedMultiplier = parser.value(speedMultiplierOption_name).toInt();
+    }
 
 #ifdef QT_DEBUG
     qDebug() << "Путь до загрузчика: " << arguments.bootloaderPath;

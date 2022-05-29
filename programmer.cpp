@@ -13,18 +13,18 @@ Programmer::Programmer(ProgrammerArguments arguments, QObject *parent)
 
     ramParser.setHexPath(arguments.bootloaderPath);
     if (!ramParser.initialize()){
-        qDebug() << "Ошибка чтения файла загрузчика " << arguments.bootloaderPath;
+        qDebug() << "Ошибка чтения файла загрузчика: " << arguments.bootloaderPath;
         initialized = false;
     }
 
     flashParser.setHexPath(arguments.programPath);
     if (!flashParser.initialize()){
-        qDebug() << "Ошибка чтения файла программы " << arguments.programPath;
+        qDebug() << "Ошибка чтения файла программы: " << arguments.programPath;
         initialized = false;
     }
 
-    if (!((arguments.speedMultiplier % 2 == 0) && (arguments.speedMultiplier >= 1 && arguments.speedMultiplier <= 16))){
-        qDebug() << "Некорректное значение умножителя частоты обмена " << arguments.speedMultiplier;
+    if (!((arguments.speedMultiplier % 2 == 0 || arguments.speedMultiplier == 1) && (arguments.speedMultiplier >= 1 && arguments.speedMultiplier <= 16))){
+        qDebug() << "Некорректное значение умножителя частоты обмена: " << arguments.speedMultiplier;
         initialized = false;
     }
 
@@ -137,7 +137,7 @@ bool Programmer::flashBootloader_sync()
     }
 
     if	(!(uart.getByte(0) == 0x0D && uart.getByte(1) == 0x0A && uart.getByte(2) == 0x3E)){
-        qDebug() << "Ошибка синхронизации!";
+        qDebug() << "Ошибка синхронизации! Перезагрузите контроллер.";
         uart.end();
         return false;
     }
