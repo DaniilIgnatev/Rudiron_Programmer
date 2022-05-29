@@ -85,23 +85,18 @@ void UART::errorSlot(QSerialPort::SerialPortError error){
     }
 }
 
+#ifdef _WIN32
 void UART::writeSync()
 {
-#ifdef _WIN32
     for (int i = 0; i < 15; i++){
         serial->write(QByteArray(1, 0));
     }
 
     serial->waitForBytesWritten();
-#else
-    serial->write(QByteArray(1, byte));
-    return serial->waitForReadyRead(1);
-#endif
 }
 
 void UART::writeRead(QByteArray buffer, int waitRXBytes, int forceReadTimeout)
 {
-#ifdef _WIN32
     serial->write(buffer);
     serial->waitForBytesWritten();
 
@@ -122,39 +117,34 @@ void UART::writeRead(QByteArray buffer, int waitRXBytes, int forceReadTimeout)
             popByte();
         }
     }
+}
+
 #else
+void UART::writeSync()
+{
+    serial->write(QByteArray(1, 0));
+    serial->waitForReadyRead(1);
+}
+
+void UART::writeRead(QByteArray buffer, int waitRXBytes, int forceReadTimeout)
+{
+    Q_UNUSED(forceReadTimeout);
+
     if (waitRXBytes > 0){
-        uint64_t time = 0;
-
-        int ratio = serial->baudRate() / 14400;
-        if (ratio <= 0){
-            ratio = 1;
-        }
-
-        uint64_t timeout = forceTimeout;
-        if (timeout == 0){
-            timeout = waitRXBytes * 640000 / ratio;
-        }
-
         serial->write(buffer);
         serial->waitForReadyRead(read_delay);
-        time += read_delay;
 
-        while (time < timeout && rx_buffer_index < waitRXBytes){
+        while (rx_buffer_index < waitRXBytes){
             QThread::currentThread()->usleep(getEventLoopDelay());
             serial->waitForReadyRead(read_delay);
-            time += read_delay * 1000 + getEventLoopDelay();
         }
-
-        return time <= timeout && rx_buffer_index >= waitRXBytes;
     }
     else{
         serial->write(buffer);
         serial->waitForReadyRead(10);
-        return true;
     }
-#endif
 }
+#endif
 
 int UART::readByte()
 {

@@ -54,10 +54,15 @@ ArgumentsParser::ArgumentsParser()
 
 ProgrammerArguments ArgumentsParser::processProgrammerArguments(QCoreApplication& a)
 {
-    parser.process(a);
-    const QStringList pos_args = parser.positionalArguments();
-
     ProgrammerArguments arguments;
+    parser.process(a);
+
+    const QStringList pos_args = parser.positionalArguments();
+    if (pos_args.count() < 2){
+        qDebug() << "Недостаточно аргументов!";
+        return arguments;
+    }
+
     arguments.bootloaderPath = pos_args[0];
     arguments.programPath = pos_args[1];
 
