@@ -3,3 +3,6 @@ release/
 users*
 Makefile*
 *.user
+*Debug
+*Release
+*make*
