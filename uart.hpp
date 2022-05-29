@@ -1,10 +1,9 @@
 #ifndef UART_HPP
 #define UART_HPP
 
+#include "TypeDefs.hpp"
 #include <QObject>
-#include <QString>
 #include <QSerialPort>
-#include <QtDebug>
 #include <QSerialPortInfo>
 
 class UART : public QObject
@@ -37,9 +36,9 @@ public:
 
     int getEventLoopDelay();
 
-    bool write(char byte, int times = 1);
+    void writeSync();
 
-    bool write(QByteArray buffer, int readBytes, int forceTimeout = 0);
+    void writeRead(QByteArray buffer, int readBytes, int forceReadTimeout = 0);
 
     int readByte();
 

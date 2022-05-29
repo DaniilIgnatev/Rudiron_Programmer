@@ -62,8 +62,10 @@ void Programmer::start()
     if (!flashBootloader_load()){
         return;
     }
-    if (!flashBootloader_verify()){
-        return;
+    if (arguments.options.checked(ProgrammerOptionsEnum::Verify)){
+        if (!flashBootloader_verify()){
+            return;
+        }
     }
     if (!flashBootloader_run()){
         return;
@@ -107,7 +109,7 @@ bool Programmer::flashBootloader_sync()
     uart.clearRXBuffer();
 
     for(int i = 0; i < 512; i++){
-        uart.write(0x0, 15);
+        uart.writeSync();
 
         if (uart.getByte(0) == 0x0D && uart.getByte(1) == 0x0A && uart.getByte(2) == 0x3E) {
             break;
@@ -140,14 +142,14 @@ bool Programmer::flashBootloader_switchSpeed()
     txdbuf[4] = *((BYTE*)&speed + 3);
 
     uart.clearRXBuffer();
-    uart.write(txdbuf, 0);
+    uart.writeRead(txdbuf, 0);
 
     uart.setBaudRate(getSpeed());
 
     txdbuf.resize(1);
     txdbuf[0] = 0xd;
     uart.clearRXBuffer();
-    uart.write(txdbuf, 3);
+    uart.writeRead(txdbuf, 3);
 
     if	(uart.getByte(0) != 0xd || uart.getByte(1) != 0xa || uart.getByte(2) != 0x3e){
         qDebug() << "Ошибка установки скорости обмена " << getSpeed() << " бод!";
@@ -172,18 +174,19 @@ bool Programmer::flashBootloader_load()
     txdbuf[6] = (ramParser.getProgram_il() >> 8) & 0xff;
     txdbuf[7] = 0;
     txdbuf[8] = 0;
-    uart.clearRXBuffer();
-    bool received = uart.write(txdbuf, 1);
 
-    if	(!received || uart.getByte(0) != 'L'){
+    uart.clearRXBuffer();
+    uart.writeRead(txdbuf, 1);
+
+    if	(uart.getByte(0) != 'L'){
         qDebug() << "Ошибка загрузки бутлодера в начале!";
         uart.end();
         return false;
     }
 
     uart.clearRXBuffer();
-    received = uart.write(ramParser.getProgramBuffer_notEmpty(), 1);
-    if	(received == false || uart.getByte(0) !='K'){
+    uart.writeRead(ramParser.getProgramBuffer_notEmpty(), 1);
+    if	(uart.getByte(0) !='K'){
         qDebug() << "Ошибка загрузки бутлодера в конце!";
         uart.end();
         return false;
@@ -209,10 +212,11 @@ bool Programmer::flashBootloader_verify()
         txdbuf[6] = 0;
         txdbuf[7] = 0;
         txdbuf[8] = 0;
-        uart.clearRXBuffer();
-        bool received = uart.write(txdbuf, 10);
 
-        if (received && (uart.getByte(0) == 'Y') && (uart.getByte(9) == 'K')){
+        uart.clearRXBuffer();
+        uart.writeRead(txdbuf, 10);
+
+        if ((uart.getByte(0) == 'Y') && (uart.getByte(9) == 'K')){
             for (int j = 0; j < 8; j++){
                 if ((unsigned char)uart.getByte(j + 1) != (unsigned char)ramParser.getProgram_buffer().at(ramParser.getProgram_dwadr() + 8 * i + j)){
                     qDebug() << "Ошибка верификации бутлодера!";
@@ -243,10 +247,11 @@ bool Programmer::flashBootloader_run()
     txdbuf[2] = (ramParser.getProgram_dwadr() >> 8) & 0xff;
     txdbuf[3] = 0;
     txdbuf[4] = 0x20;
-    uart.clearRXBuffer();
-    bool received = uart.write(txdbuf, 1);
 
-    if	(!received || uart.getByte(0) != 'R'){
+    uart.clearRXBuffer();
+    uart.writeRead(txdbuf, 1);
+
+    if	(uart.getByte(0) != 'R'){
         qDebug() << "Ошибка запуска бутлодера!";
         uart.end();
         return false;
@@ -263,14 +268,9 @@ bool Programmer::flashBootloader_identify()
 
     txdbuf.resize(1);
     txdbuf[0] = 'I';
-    uart.clearRXBuffer();
-    bool received = uart.write(txdbuf, 12);
 
-    if (!received){
-        qDebug() << "Ошибка идентификации загрузчика!";
-        uart.end();
-        return false;
-    }
+    uart.clearRXBuffer();
+    uart.writeRead(txdbuf, 12);
 
     for (int j = 0; j < 12; j++){
         if (uart.getByte(j) != id_str[j]){
@@ -290,10 +290,11 @@ bool Programmer::flashProgram_erase()
 
     txdbuf.resize(1);
     txdbuf[0] = 'E';
-    uart.clearRXBuffer();
-    bool received = uart.write(txdbuf, 9, 2000000);
 
-    if	(!received || uart.getByte(0) != 'E'){
+    uart.clearRXBuffer();
+    uart.writeRead(txdbuf, 9, 800000);
+
+    if	(uart.getByte(0) != 'E'){
         qDebug() << "Ошибка очистки памяти!";
         uart.end();
         return false;
@@ -325,10 +326,11 @@ bool Programmer::flashProgram_load()
     txdbuf[2] = 0x00;
     txdbuf[3] = 0x00;
     txdbuf[4] = 0x08;
-    uart.clearRXBuffer();
-    bool received = uart.write(txdbuf, 1);
 
-    if (!received || uart.getByte(0) != 0x08){
+    uart.clearRXBuffer();
+    uart.writeRead(txdbuf, 1);
+
+    if (uart.getByte(0) != 0x08){
         qDebug() << "Ошибка загрузки основной программы!";
         uart.end();
         return false;
@@ -337,24 +339,18 @@ bool Programmer::flashProgram_load()
     // шагаем по памяти каждые 256 байт
     int last_progress = 0;
     for (int i = 0; i < (flashParser.getProgram_il() >> 8); i++){
-        uart.write('P');
-
         QByteArray block = flashParser.getProgram_buffer().mid(i << 8, 256);
+        block.prepend('P');
 
         BYTE ks = 0;
-        for (int j = 0;j < 256; j++){
+        for (int j = 0 + 1;j < 256 + 1; j++){
             ks += block.at(j);
         }
 
         uart.clearRXBuffer();
+        uart.writeRead(block, 1);
 
-#ifdef _WIN32
-        received = uart.write(block, 1, 2000);
-#else
-        received = uart.write(block, 1);
-#endif
-
-        if (!received || (BYTE)uart.getByte(0) != ks){
+        if ((BYTE)uart.getByte(0) != ks){
             qDebug() << "Ошибка загрузки основной программы!";
             uart.end();
             return false;
@@ -381,10 +377,11 @@ bool Programmer::flashProgram_verify()
     txdbuf[2] = 0x00;
     txdbuf[3] = 0x00;
     txdbuf[4] = 0x08;
-    uart.clearRXBuffer();
-    bool received = uart.write(txdbuf, 1);
 
-    if (!received || uart.getByte(0) != 0x08){
+    uart.clearRXBuffer();
+    uart.writeRead(txdbuf, 1);
+
+    if (uart.getByte(0) != 0x08){
         qDebug() << "Ошибка при проверке основной программы!";
         uart.end();
         return false;
@@ -396,12 +393,7 @@ bool Programmer::flashProgram_verify()
     for (int i = 0;i < (flashParser.getProgram_il() >> 8); i++){
         for (int j = 0; j < 32; j++){
             uart.clearRXBuffer();
-            received = uart.write(txdbuf, 8);
-            if (!received){
-                qDebug() << "Ошибка при проверке основной программы!";
-                uart.end();
-                return false;
-            }
+            uart.writeRead(txdbuf, 8);
 
             for (int k = 0; k < 8; k++){
                 if ((BYTE)uart.getByte(k) != (BYTE)flashParser.getProgram_buffer().at(k + (j << 3) + (i << 8))){
@@ -431,7 +423,7 @@ bool Programmer::flashProgram_run()
 {
     qDebug() << "Начал запуск основной программы.";
 
-    uart.write('R');
+    uart.writeRead(QByteArray(1, 'R'), 1);
 
     if	(!uart.getByte('R')){
         qDebug() << "Ошибка при запуске основной программы!";

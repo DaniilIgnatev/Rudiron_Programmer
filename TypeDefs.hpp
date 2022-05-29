@@ -6,7 +6,6 @@
 #include <QtDebug>
 #include <QDateTime>
 
-
 #include <QDir>
 #include <QFile>
 #include <QIODevice>

@@ -13,9 +13,9 @@ int main(int argc, char *argv[])
 //    argv2[2] = (char*)"/Users/daniilignatev/Yandex.Disk.localized/Documents/Rudiron/Distributive/components/win_x64/RudironDistributive/tools/UART programmer/1986UARTWSD/RudironDiagnostics.hex";
     argv2[2] = "C:/Users/user/YandexDisk/Documents/Rudiron/Distributive/components/win_x64/RudironDistributive/tools/UART programmer/1986UARTWSD/RudironDiagnostics.hex";
     argv2[3] = (char*)"-P";
-    argv2[4] = (char*)"-E";
+    argv2[4] = (char*)"E";
     argv2[5] = (char*)"-L";
-    argv2[6] = (char*)"-V";
+    argv2[6] = (char*)"V";
     argv2[7] = (char*)"-R";
     argv2[8] = (char*)"-S";
     argv2[9] = (char*)"16";
