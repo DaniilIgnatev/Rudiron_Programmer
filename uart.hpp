@@ -38,7 +38,7 @@ public:
 
     void writeSync();
 
-    void writeRead(QByteArray buffer, int readBytes, int forceReadTimeout = 0);
+    void writeRead(QByteArray buffer, int readBytes);
 
     int readByte();
 

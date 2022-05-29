@@ -111,7 +111,7 @@ bool Programmer::open()
     }
 
     if (port.isNull() || !uart.begin(port)){
-        qDebug() << "Ошибка открытия COM порта.";
+        qDebug() << "Ошибка открытия порта " << port.portName() << "!";
         return false;
     }
 
@@ -312,7 +312,7 @@ bool Programmer::flashProgram_erase()
     txdbuf[0] = 'E';
 
     uart.clearRXBuffer();
-    uart.writeRead(txdbuf, 9, 800000);
+    uart.writeRead(txdbuf, 9);
 
     if	(uart.getByte(0) != 'E'){
         qDebug() << "Ошибка очистки памяти!";

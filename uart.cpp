@@ -95,19 +95,11 @@ void UART::writeSync()
     serial->waitForBytesWritten();
 }
 
-void UART::writeRead(QByteArray buffer, int waitRXBytes, int forceReadTimeout)
+void UART::writeRead(QByteArray buffer, int waitRXBytes)
 {
     serial->write(buffer);
     serial->waitForBytesWritten();
-
-    if (forceReadTimeout){
-        serial->waitForReadyRead(forceReadTimeout / 1000);
-    }
-    else{
-        for (int i = 0; i < 300; i++){
-            serial->waitForReadyRead(0);
-        }
-    }
+    serial->waitForReadyRead(1);
 
     if (waitRXBytes){
         while (rx_buffer_index < waitRXBytes){
@@ -126,10 +118,8 @@ void UART::writeSync()
     serial->waitForReadyRead(1);
 }
 
-void UART::writeRead(QByteArray buffer, int waitRXBytes, int forceReadTimeout)
+void UART::writeRead(QByteArray buffer, int waitRXBytes)
 {
-    Q_UNUSED(forceReadTimeout);
-
     if (waitRXBytes > 0){
         serial->write(buffer);
         serial->waitForReadyRead(read_delay);
