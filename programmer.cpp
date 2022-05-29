@@ -62,7 +62,7 @@ void Programmer::start()
     if (!flashBootloader_load()){
         return;
     }
-    if (arguments.options.checked(ProgrammerOptionsEnum::Verify)){
+    if (arguments.options.checked(ProgrammerOptionsEnum::VerifyBootloader)){
         if (!flashBootloader_verify()){
             return;
         }
@@ -84,7 +84,7 @@ void Programmer::start()
             return;
         }
     }
-    if (arguments.options.checked(ProgrammerOptionsEnum::Verify)){
+    if (arguments.options.checked(ProgrammerOptionsEnum::VerifyProgram)){
         if (!flashProgram_verify()){
             return;
         }
@@ -357,7 +357,7 @@ bool Programmer::flashProgram_load()
         }
 
         int progress = (int)(((double)(i + 1) / (double)(flashParser.getProgram_il() >> 8)) * 100.0);
-        if (arguments.showProgress && last_progress != progress && progress % 10 == 0){
+        if (last_progress != progress && progress % 10 == 0){
             qDebug() << "Прогресс загрузки: " << progress << "%.";
             last_progress = progress;
         }
@@ -409,7 +409,7 @@ bool Programmer::flashProgram_verify()
         }
 
         int progress = (int)(((double)(i + 1) / (double)(flashParser.getProgram_il() >> 8)) * 100.0);
-        if (arguments.showProgress && last_progress != progress && progress % 10 == 0){
+        if (last_progress != progress && progress % 10 == 0){
             qDebug() << "Прогресс проверки: " << progress << "%.";
             last_progress = progress;
         }

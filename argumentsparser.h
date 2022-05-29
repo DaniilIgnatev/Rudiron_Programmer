@@ -8,39 +8,29 @@
 #include "programmerarguments.h"
 
 
-class ArgumentsParser : public QObject
+class ArgumentsParser
 {
-    Q_OBJECT
 private:
   QCommandLineParser parser;
 
-  const QString showProgressOption_short = "P";
+public:
+  const QString showProgressOption_name = "progress";
 
-  const QString showProgressOption_long = "progress";
+  const QString verifyBootloaderOption_name = "verify_bootloader";
 
-  const QString eraseOption_short = "E";
+  const QString eraseOption_name = "erase";
 
-  const QString eraseOption_long = "erase";
+  const QString loadOption_name = "load";
 
-  const QString loadOption_short = "L";
+  const QString verifyProgramOption_name = "verify_program";
 
-  const QString loadOption_long = "load";
+  const QString runOption_name = "run";
 
-  const QString verifyOption_short = "V";
-
-  const QString verifyOption_long = "verify";
-
-  const QString runOption_short = "R";
-
-  const QString runOption_long = "run";
-
-  const QString speedMultiplierOption_short = "S";
-
-  const QString speedMultiplierOption_long = "speed";
+  const QString speedMultiplierOption_name = "speed";
 
 
 public:
-    explicit ArgumentsParser(QObject *parent = nullptr);
+    explicit ArgumentsParser();
 
     ProgrammerArguments processProgrammerArguments(QCoreApplication& a);
 

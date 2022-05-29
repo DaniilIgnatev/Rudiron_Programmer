@@ -6,10 +6,11 @@
 
 enum ProgrammerOptionsEnum{
     None = 0,
-    Erase = 1,
-    Load = 2,
-    Verify = 4,
-    Run = 8
+    VerifyBootloader = 1,
+    Erase = 2,
+    Load = 4,
+    VerifyProgram = 8,
+    Run = 16
 };
 
 
@@ -24,8 +25,6 @@ public:
 
 
 struct ProgrammerArguments{
-    bool showProgress = false;
-
     QString bootloaderPath;
 
     QString programPath;
