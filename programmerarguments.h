@@ -25,6 +25,8 @@ public:
 
 
 struct ProgrammerArguments{
+    bool keepOpen = false;
+
     QString bootloaderPath;
 
     QString programPath;

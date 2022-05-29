@@ -9,7 +9,10 @@ ArgumentsParser::ArgumentsParser()
     parser.addPositionalArgument("bootloader", "Полный путь до загрузчика.");
     parser.addPositionalArgument("program", "Полный путь до загружаемой программы пользователя.");
 
-    ///Опция W wait. Ожидает нажатия клавиши для закрытия
+    ///Ожидает нажатия клавиши для закрытия
+    QCommandLineOption keepOpeOption(keepOpen_name,
+                                   "Ожидает нажатие клавиши перед завершением.");
+    parser.addOption(keepOpeOption);
 
     /// Опция C com. Принудительно задает имя COM-порта.
 
@@ -17,11 +20,6 @@ ArgumentsParser::ArgumentsParser()
     QCommandLineOption verifyBootloaderOption(verifyBootloaderOption_name,
                                    "Проверка загрузчика.");
     parser.addOption(verifyBootloaderOption);
-
-    ///Опция показа прогресса загрузки и проверки программы в ПЗУ
-    QCommandLineOption showProgressOption(showProgressOption_name,
-                                   "Показывать прогресс загрузки и верификации программы пользователя.");
-    parser.addOption(showProgressOption);
 
     ///Опция полной очистки ПЗУ
     QCommandLineOption eraseOption(eraseOption_name,
@@ -76,6 +74,7 @@ ProgrammerArguments ArgumentsParser::processProgrammerArguments(QCoreApplication
         options.check(ProgrammerOptionsEnum::Run);
     }
 
+    arguments.keepOpen = parser.isSet(keepOpen_name);
     arguments.options = options;
     arguments.speedMultiplier = parser.value(speedMultiplierOption_name).toInt();
 

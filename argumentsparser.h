@@ -14,7 +14,7 @@ private:
   QCommandLineParser parser;
 
 public:
-  const QString showProgressOption_name = "progress";
+  const QString keepOpen_name = "keep_open";
 
   const QString verifyBootloaderOption_name = "verify_bootloader";
 
@@ -27,7 +27,6 @@ public:
   const QString runOption_name = "run";
 
   const QString speedMultiplierOption_name = "speed";
-
 
 public:
     explicit ArgumentsParser();

@@ -31,7 +31,7 @@ private:
 public:
     explicit Programmer(ProgrammerArguments arguments, QObject *parent = nullptr);
 
-    void start();
+    bool start();
 
 private:
 

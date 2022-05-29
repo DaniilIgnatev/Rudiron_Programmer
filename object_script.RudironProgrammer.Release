@@ -6,7 +6,6 @@ release/main.o
 release/programmer.o
 release/programmerarguments.o
 release/uart.o
-release/moc_argumentsparser.o
 release/moc_hexflashparser.o
 release/moc_hexparser.o
 release/moc_hexramparser.o

@@ -31,11 +31,11 @@ Programmer::Programmer(ProgrammerArguments arguments, QObject *parent)
     this->arguments = arguments;
 }
 
-void Programmer::start()
+bool Programmer::start()
 {
     if (!initialized){
         qDebug() << "Программа запущена с некорректными аргументами! Завершение работы.";
-        return;
+        return false;
     }
 
     auto ports = QSerialPortInfo::availablePorts();
@@ -50,52 +50,53 @@ void Programmer::start()
 
     if (port.isNull() || !uart.begin(port)){
         qDebug() << "Ошибка открытия COM порта.";
-        return;
+        return false;
     }
 
     if (!flashBootloader_sync()){
-        return;
+        return false;
     }
     if (!flashBootloader_switchSpeed()){
-        return;
+        return false;
     }
     if (!flashBootloader_load()){
-        return;
+        return false;
     }
     if (arguments.options.checked(ProgrammerOptionsEnum::VerifyBootloader)){
         if (!flashBootloader_verify()){
-            return;
+            return false;
         }
     }
     if (!flashBootloader_run()){
-        return;
+        return false;
     }
     if (!flashBootloader_identify()){
-        return;
+        return false;
     }
 
     if (arguments.options.checked(ProgrammerOptionsEnum::Erase)){
         if (!flashProgram_erase()){
-            return;
+            return false;
         }
     }
     if (arguments.options.checked(ProgrammerOptionsEnum::Load)){
         if (!flashProgram_load()){
-            return;
+            return false;
         }
     }
     if (arguments.options.checked(ProgrammerOptionsEnum::VerifyProgram)){
         if (!flashProgram_verify()){
-            return;
+            return false;
         }
     }
     if (arguments.options.checked(ProgrammerOptionsEnum::Run)){
         if (!flashProgram_run()){
-            return;
+            return false;
         }
     }
 
     uart.end();
+    return true;
 }
 
 int Programmer::getSpeed()
