@@ -14,8 +14,6 @@ ArgumentsParser::ArgumentsParser()
                                    "Ожидает нажатие клавиши перед завершением.");
     parser.addOption(keepOpeOption);
 
-    /// Опция C com. Принудительно задает имя COM-порта.
-
     ///Опция верификации загрузчика
     QCommandLineOption verifyBootloaderOption(verifyBootloaderOption_name,
                                    "Проверка загрузчика.");
@@ -41,6 +39,12 @@ ArgumentsParser::ArgumentsParser()
                                   "Запуск программы пользователя.");
     parser.addOption(runOption);
 
+    ///Принудительно задает имя COM-порта.
+    QCommandLineOption portNameOption(portNameOption_name,
+                                  "Установить имя последовательного порта <name>.",
+                                  "<name>");
+    parser.addOption(portNameOption);
+
     ///Опция установки скорости обмена с бутлодером (baud rate)
     QCommandLineOption speedMultiplierOption(speedMultiplierOption_name,
                                   "Установить умножитель скорости обмена <multiplier>. Возможные значения: 1 (14400), 2 (28800), 4 (57600), 8 (115200), 16 (230400)",
@@ -56,6 +60,8 @@ ProgrammerArguments ArgumentsParser::processProgrammerArguments(QCoreApplication
     ProgrammerArguments arguments;
     arguments.bootloaderPath = pos_args[0];
     arguments.programPath = pos_args[1];
+
+    arguments.keepOpen = parser.isSet(keepOpen_name);
 
     ProgrammerOptions options;
     if (parser.isSet(verifyBootloaderOption_name)){
@@ -74,13 +80,18 @@ ProgrammerArguments ArgumentsParser::processProgrammerArguments(QCoreApplication
         options.check(ProgrammerOptionsEnum::Run);
     }
 
-    arguments.keepOpen = parser.isSet(keepOpen_name);
     arguments.options = options;
+
+    if (parser.isSet(portNameOption_name)){
+        arguments.portName = parser.value(portNameOption_name);
+    }
+
     arguments.speedMultiplier = parser.value(speedMultiplierOption_name).toInt();
 
 #ifdef QT_DEBUG
     qDebug() << "Путь до загрузчика: " << arguments.bootloaderPath;
     qDebug() << "Путь до программы пользователя: " << arguments.programPath;
+    qDebug() << "Имя последовательного порта: " << arguments.portName;
     qDebug() << "Умножитель скорости: " << arguments.speedMultiplier;
     qDebug() << "ProgrammerOptionsEnum::VerifyProgram: " << arguments.options.checked(ProgrammerOptionsEnum::VerifyProgram);
     qDebug() << "ProgrammerOptionsEnum::Erase: " << arguments.options.checked(ProgrammerOptionsEnum::Erase);

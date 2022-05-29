@@ -38,18 +38,7 @@ bool Programmer::start()
         return false;
     }
 
-    auto ports = QSerialPortInfo::availablePorts();
-    QSerialPortInfo port;
-
-    for (auto &p: ports){
-        if (p.productIdentifier() == 60000){
-            port = p;
-            break;
-        }
-    }
-
-    if (port.isNull() || !uart.begin(port)){
-        qDebug() << "Ошибка открытия COM порта.";
+    if (!open()){
         return false;
     }
 
@@ -96,6 +85,36 @@ bool Programmer::start()
     }
 
     uart.end();
+    return true;
+}
+
+bool Programmer::open()
+{
+    QSerialPortInfo port;
+    auto ports = QSerialPortInfo::availablePorts();
+
+    if (arguments.portName.isEmpty()){
+        for (auto &p: ports){
+            if (p.productIdentifier() == 60000){
+                port = p;
+                break;
+            }
+        }
+    }
+    else{
+        for (auto &p: ports){
+            if (p.portName() == arguments.portName){
+                port = p;
+                break;
+            }
+        }
+    }
+
+    if (port.isNull() || !uart.begin(port)){
+        qDebug() << "Ошибка открытия COM порта.";
+        return false;
+    }
+
     return true;
 }
 

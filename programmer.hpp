@@ -35,6 +35,8 @@ public:
 
 private:
 
+    bool open();
+
     int getSpeed();
 
     void sync();

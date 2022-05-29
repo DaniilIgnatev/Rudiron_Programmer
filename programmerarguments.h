@@ -33,6 +33,8 @@ struct ProgrammerArguments{
 
     int speedMultiplier = 1;
 
+    QString portName;
+
     ProgrammerOptions options;
 };
 
