@@ -13,18 +13,33 @@ Programmer::Programmer(ProgrammerArguments arguments, QObject *parent)
 
     ramParser.setHexPath(arguments.bootloaderPath);
     if (!ramParser.initialize()){
-        qDebug() << "Ошибка чтения файла загрузчика: " << arguments.bootloaderPath;
+        if (arguments.english){
+            qDebug() << "An error occured while reading the bootloader: " << arguments.bootloaderPath;
+        }
+        else{
+             qDebug() << "Ошибка чтения файла загрузчика: " << arguments.bootloaderPath;
+        }
         initialized = false;
     }
 
     flashParser.setHexPath(arguments.programPath);
     if (!flashParser.initialize()){
-        qDebug() << "Ошибка чтения файла программы: " << arguments.programPath;
+        if (arguments.english){
+            qDebug() << "An error occured while reading the user-program: " << arguments.programPath;
+        }
+        else{
+             qDebug() << "Ошибка чтения файла программы: " << arguments.programPath;
+        }
         initialized = false;
     }
 
     if (!((arguments.speedMultiplier % 2 == 0 || arguments.speedMultiplier == 1) && (arguments.speedMultiplier >= 1 && arguments.speedMultiplier <= 16))){
-        qDebug() << "Некорректное значение умножителя частоты обмена: " << arguments.speedMultiplier;
+        if (arguments.english){
+            qDebug() << "Wrong speed multiplier value: " << arguments.speedMultiplier;
+        }
+        else{
+             qDebug() << "Некорректное значение умножителя частоты обмена: " << arguments.speedMultiplier;
+        }
         initialized = false;
     }
 
@@ -34,7 +49,12 @@ Programmer::Programmer(ProgrammerArguments arguments, QObject *parent)
 bool Programmer::start()
 {
     if (!initialized){
-        qDebug() << "Программа запущена с некорректными аргументами! Завершение работы.";
+        if (arguments.english){
+            qDebug() << "Program started with invalid arguments! Exit.";
+        }
+        else{
+             qDebug() << "Программа запущена с некорректными аргументами! Завершение работы.";
+        }
         return false;
     }
 
@@ -110,12 +130,30 @@ bool Programmer::open()
         }
     }
 
-    if (port.isNull() || !uart.begin(port)){
-        qDebug() << "Ошибка открытия порта " << port.portName() << "!";
+    if (!port.portName().isEmpty()){
+        if (!uart.begin(port)){
+            if (arguments.english){
+                qDebug() << "An error occured when opening the serial port " << port.portName() << "!";
+            }
+            else{
+                 qDebug() << "Ошибка открытия порта " << port.portName() << "!";
+            }
+            return false;
+        }
+        else{
+            return true;
+        }
+    }
+    else{
+        if (arguments.english){
+            qDebug() << "Error! COM port was not detected!";
+        }
+        else{
+             qDebug() << "Ошибка! COM порт не был обнаружен!";
+        }
+
         return false;
     }
-
-    return true;
 }
 
 int Programmer::getSpeed()
@@ -125,7 +163,12 @@ int Programmer::getSpeed()
 
 bool Programmer::flashBootloader_sync()
 {
-    qDebug() << "Начал синхронизацию.";
+    if (arguments.english){
+        qDebug() << "Started synchronization.";
+    }
+    else{
+         qDebug() << "Начал синхронизацию.";
+    }
     uart.clearRXBuffer();
 
     for(int i = 0; i < 512; i++){
@@ -137,19 +180,36 @@ bool Programmer::flashBootloader_sync()
     }
 
     if	(!(uart.getByte(0) == 0x0D && uart.getByte(1) == 0x0A && uart.getByte(2) == 0x3E)){
-        qDebug() << "Ошибка синхронизации! Перезагрузите контроллер.";
+        if (arguments.english){
+            qDebug() << "Synchronization error! Restart the controller.";
+        }
+        else{
+             qDebug() << "Ошибка синхронизации! Перезагрузите контроллер.";
+        }
+
         uart.end();
         return false;
     }
 
-    qDebug() << "Завершил синхронизацию.";
+    if (arguments.english){
+        qDebug() << "Finished synchronization.";
+    }
+    else{
+         qDebug() << "Завершил синхронизацию.";
+    }
+
     uart.clearRXBuffer();
     return true;
 }
 
 bool Programmer::flashBootloader_switchSpeed()
 {
-    qDebug() << "Начал установку скорости обмена " << getSpeed() << " бод!";
+    if (arguments.english){
+        qDebug() << "Started setting the exchange rate " << getSpeed() << " baud rate!";
+    }
+    else{
+         qDebug() << "Начал установку скорости обмена " << getSpeed() << " бод!";
+    }
 
     int speed = getSpeed();
 
@@ -172,18 +232,36 @@ bool Programmer::flashBootloader_switchSpeed()
     uart.writeRead(txdbuf, 3);
 
     if	(uart.getByte(0) != 0xd || uart.getByte(1) != 0xa || uart.getByte(2) != 0x3e){
-        qDebug() << "Ошибка установки скорости обмена " << getSpeed() << " бод!";
+        if (arguments.english){
+            qDebug() << "Exchange rate setting error " << getSpeed() << " baud rate!";
+        }
+        else{
+             qDebug() << "Ошибка установки скорости обмена " << getSpeed() << " бод!";
+        }
+
         uart.end();
         return false;
     }
 
-    qDebug() << "Закончил установку скорости обмена " << getSpeed() << " бод!";
+    if (arguments.english){
+        qDebug() << "Finished setting the exchange rate " << getSpeed() << " baud rate!";
+    }
+    else{
+        qDebug() << "Закончил установку скорости обмена " << getSpeed() << " бод!";
+    }
+
     return true;
 }
 
 bool Programmer::flashBootloader_load()
 {
-    qDebug() << "Начал загрузку бутлодера.";
+    if (arguments.english){
+        qDebug() << "Started bootloader download.";
+    }
+    else{
+        qDebug() << "Начал загрузку бутлодера.";
+    }
+
     txdbuf.resize(9);
     txdbuf[0] = 'L';
     txdbuf[1] = (ramParser.getProgram_dwadr() & 0xff);
@@ -199,7 +277,13 @@ bool Programmer::flashBootloader_load()
     uart.writeRead(txdbuf, 1);
 
     if	(uart.getByte(0) != 'L'){
-        qDebug() << "Ошибка загрузки бутлодера в начале!";
+        if (arguments.english){
+            qDebug() << "Bootloader error at the beginning!";
+        }
+        else{
+            qDebug() << "Ошибка загрузки бутлодера в начале!";
+        }
+
         uart.end();
         return false;
     }
@@ -207,19 +291,36 @@ bool Programmer::flashBootloader_load()
     uart.clearRXBuffer();
     uart.writeRead(ramParser.getProgramBuffer_notEmpty(), 1);
     if	(uart.getByte(0) !='K'){
-        qDebug() << "Ошибка загрузки бутлодера в конце!";
+        if (arguments.english){
+            qDebug() << "Bootloader error at the end!";
+        }
+        else{
+            qDebug() << "Ошибка загрузки бутлодера в конце!";
+        }
+
         uart.end();
         return false;
     }
 
     uart.clearRXBuffer();
-    qDebug() << "Завершил загрузку бутлодера.";
+
+    if (arguments.english){
+        qDebug() << "Finished downloading the bootloader.";
+    }
+    else{
+        qDebug() << "Завершил загрузку бутлодера.";
+    }
     return true;
 }
 
 bool Programmer::flashBootloader_verify()
 {
-    qDebug() << "Начал верификацию бутлодера.";
+    if (arguments.english){
+        qDebug() << "Started the bootloader verification.";
+    }
+    else{
+        qDebug() << "Начал верификацию бутлодера.";
+    }
 
     for (int i = 0; i < (ramParser.getProgram_il() >> 3); i++){
         txdbuf.resize(9);
@@ -239,27 +340,47 @@ bool Programmer::flashBootloader_verify()
         if ((uart.getByte(0) == 'Y') && (uart.getByte(9) == 'K')){
             for (int j = 0; j < 8; j++){
                 if ((unsigned char)uart.getByte(j + 1) != (unsigned char)ramParser.getProgram_buffer().at(ramParser.getProgram_dwadr() + 8 * i + j)){
-                    qDebug() << "Ошибка верификации бутлодера!";
+                    if (arguments.english){
+                        qDebug() << "Bootloader verification error!";
+                    }
+                    else{
+                        qDebug() << "Ошибка верификации бутлодера!";
+                    }
                     uart.end();
                     return false;
                 }
             }
         }
         else {
-            qDebug() << "Ошибка верификации бутлодера!";
+            if (arguments.english){
+                qDebug() << "Bootloader verification error!";
+            }
+            else{
+                qDebug() << "Ошибка верификации бутлодера!";
+            }
             uart.end();
             return false;
         }
     }
 
     uart.clearRXBuffer();
-    qDebug() << "Завершил верификацию бутлодера.";
+    if (arguments.english){
+        qDebug() << "Completed bootloader verification.";
+    }
+    else{
+        qDebug() << "Завершил верификацию бутлодера.";
+    }
     return true;
 }
 
 bool Programmer::flashBootloader_run()
 {
-    qDebug() << "Начал запуск бутлодера.";
+    if (arguments.english){
+        qDebug() << "Began running bootloader.";
+    }
+    else{
+        qDebug() << "Начал запуск бутлодера.";
+    }
 
     txdbuf.resize(5);
     txdbuf[0] = 'R';
@@ -272,19 +393,36 @@ bool Programmer::flashBootloader_run()
     uart.writeRead(txdbuf, 1);
 
     if	(uart.getByte(0) != 'R'){
-        qDebug() << "Ошибка запуска бутлодера!";
+        if (arguments.english){
+            qDebug() << "Bootloader Startup Error!";
+        }
+        else{
+            qDebug() << "Ошибка запуска бутлодера!";
+        }
         uart.end();
         return false;
     }
 
     uart.clearRXBuffer();
-    qDebug() << "Завершил запуск бутлодера.";
+
+    if (arguments.english){
+        qDebug() << "Completed the bootloader run.";
+    }
+    else{
+        qDebug() << "Завершил запуск бутлодера.";
+    }
+
     return true;
 }
 
 bool Programmer::flashBootloader_identify()
 {
-    qDebug() << "Начал идентификацию загрузчика.";
+    if (arguments.english){
+        qDebug() << "Started identifying the bootloader.";
+    }
+    else{
+        qDebug() << "Начал идентификацию загрузчика.";
+    }
 
     txdbuf.resize(1);
     txdbuf[0] = 'I';
@@ -294,19 +432,34 @@ bool Programmer::flashBootloader_identify()
 
     for (int j = 0; j < 12; j++){
         if (uart.getByte(j) != id_str[j]){
-            qDebug() << "Ошибка идентификации загрузчика!";
+            if (arguments.english){
+                qDebug() << "An error when identifying the bootloader!";
+            }
+            else{
+                qDebug() << "Ошибка идентификации загрузчика!";
+            }
             uart.end();
             return false;
         }
     }
 
-    qDebug() << "Завершил идентификацию загрузчика.";
+    if (arguments.english){
+        qDebug() << "Completed the bootloader identification.";
+    }
+    else{
+        qDebug() << "Завершил идентификацию загрузчика.";
+    }
     return true;
 }
 
 bool Programmer::flashProgram_erase()
 {
-    qDebug() << "Начал полную очистку памяти.";
+    if (arguments.english){
+        qDebug() << "Started a complete memory cleanup.";
+    }
+    else{
+        qDebug() << "Начал полную очистку памяти.";
+    }
 
     txdbuf.resize(1);
     txdbuf[0] = 'E';
@@ -315,7 +468,12 @@ bool Programmer::flashProgram_erase()
     uart.writeRead(txdbuf, 9);
 
     if	(uart.getByte(0) != 'E'){
-        qDebug() << "Ошибка очистки памяти!";
+        if (arguments.english){
+            qDebug() << "Memory Clear Error!";
+        }
+        else{
+            qDebug() << "Ошибка очистки памяти!";
+        }
         uart.end();
         return false;
     }
@@ -326,11 +484,21 @@ bool Programmer::flashProgram_erase()
             + (((BYTE)uart.getByte(8)) << 24);
 
     if ((adr == 0x08020000) && (data == 0xffffffff)){
-        qDebug() << "Завершил полную очистку памяти.";
+        if (arguments.english){
+            qDebug() << "Completed a full memory cleanup.";
+        }
+        else{
+            qDebug() << "Завершил полную очистку памяти.";
+        }
         return true;
     }
     else{
-        qDebug() << "Ошибка очистки памяти!";
+        if (arguments.english){
+            qDebug() << "Memory Clear Error!";
+        }
+        else{
+            qDebug() << "Ошибка очистки памяти!";
+        }
         uart.end();
         return false;
     }
@@ -338,7 +506,12 @@ bool Programmer::flashProgram_erase()
 
 bool Programmer::flashProgram_load()
 {
-    qDebug() << "Начал загрузку основной программы.";
+    if (arguments.english){
+        qDebug() << "Started loading the main program.";
+    }
+    else{
+        qDebug() << "Начал загрузку основной программы.";
+    }
 
     txdbuf.resize(5);
     txdbuf[0] = 'A';
@@ -351,7 +524,12 @@ bool Programmer::flashProgram_load()
     uart.writeRead(txdbuf, 1);
 
     if (uart.getByte(0) != 0x08){
-        qDebug() << "Ошибка загрузки основной программы!";
+        if (arguments.english){
+            qDebug() << "Error loading the main program!";
+        }
+        else{
+            qDebug() << "Ошибка загрузки основной программы!";
+        }
         uart.end();
         return false;
     }
@@ -371,25 +549,45 @@ bool Programmer::flashProgram_load()
         uart.writeRead(block, 1);
 
         if ((BYTE)uart.getByte(0) != ks){
-            qDebug() << "Ошибка загрузки основной программы!";
+            if (arguments.english){
+                qDebug() << "Error loading the main program!";
+            }
+            else{
+                qDebug() << "Ошибка загрузки основной программы!";
+            }
             uart.end();
             return false;
         }
 
         int progress = (int)(((double)(i + 1) / (double)(flashParser.getProgram_il() >> 8)) * 100.0);
         if (last_progress != progress && progress % 10 == 0){
-            qDebug() << "Прогресс загрузки: " << progress << "%.";
+            if (arguments.english){
+                qDebug() << "Progress: " << progress << "%.";
+            }
+            else{
+                qDebug() << "Прогресс загрузки: " << progress << "%.";
+            }
             last_progress = progress;
         }
     }
 
-    qDebug() << "Завершил загрузку основной программы.";
+    if (arguments.english){
+        qDebug() << "Finished loading the main program.";
+    }
+    else{
+        qDebug() << "Завершил загрузку основной программы.";
+    }
     return true;
 }
 
 bool Programmer::flashProgram_verify()
 {
-    qDebug() << "Начал проверку основной программы.";
+    if (arguments.english){
+        qDebug() << "Started verifying the main program.";
+    }
+    else{
+        qDebug() << "Начал проверку основной программы.";
+    }
 
     txdbuf.resize(5);
     txdbuf[0] = 'A';
@@ -402,7 +600,12 @@ bool Programmer::flashProgram_verify()
     uart.writeRead(txdbuf, 1);
 
     if (uart.getByte(0) != 0x08){
-        qDebug() << "Ошибка при проверке основной программы!";
+        if (arguments.english){
+            qDebug() << "Error when checking the main program!";
+        }
+        else{
+            qDebug() << "Ошибка при проверке основной программы!";
+        }
         uart.end();
         return false;
     }
@@ -417,11 +620,20 @@ bool Programmer::flashProgram_verify()
 
             for (int k = 0; k < 8; k++){
                 if ((BYTE)uart.getByte(k) != (BYTE)flashParser.getProgram_buffer().at(k + (j << 3) + (i << 8))){
-                    qDebug() << "Ошибка при проверке основной программы!";
-                    qDebug() << "Адрес:" << QString("0x").append(QString::number(0x08000000 + k + (j << 3) + (i << 8), 16))
-                             << ". Записано:" << QString("0x").append(QString::number((BYTE)flashParser.getProgram_buffer().at(k + (j << 3) + (i << 8)), 16))
-                             << ". Прочитано:" << QString("0x").append(QString::number((BYTE)ramParser.getProgram_buffer().at(k), 16))
-                             << ".";
+                    if (arguments.english){
+                        qDebug() << "Error when checking the main program!";
+                        qDebug() << "Address:" << QString("0x").append(QString::number(0x08000000 + k + (j << 3) + (i << 8), 16))
+                                 << ". Written:" << QString("0x").append(QString::number((BYTE)flashParser.getProgram_buffer().at(k + (j << 3) + (i << 8)), 16))
+                                 << ". Read:" << QString("0x").append(QString::number((BYTE)ramParser.getProgram_buffer().at(k), 16))
+                                 << ".";
+                    }
+                    else{
+                        qDebug() << "Ошибка при проверке основной программы!";
+                        qDebug() << "Адрес:" << QString("0x").append(QString::number(0x08000000 + k + (j << 3) + (i << 8), 16))
+                                 << ". Записано:" << QString("0x").append(QString::number((BYTE)flashParser.getProgram_buffer().at(k + (j << 3) + (i << 8)), 16))
+                                 << ". Прочитано:" << QString("0x").append(QString::number((BYTE)ramParser.getProgram_buffer().at(k), 16))
+                                 << ".";
+                    }
                     uart.end();
                     return false;
                 }
@@ -430,28 +642,53 @@ bool Programmer::flashProgram_verify()
 
         int progress = (int)(((double)(i + 1) / (double)(flashParser.getProgram_il() >> 8)) * 100.0);
         if (last_progress != progress && progress % 10 == 0){
-            qDebug() << "Прогресс проверки: " << progress << "%.";
+            if (arguments.english){
+                qDebug() << "Progress: " << progress << "%.";
+            }
+            else{
+                qDebug() << "Прогресс проверки: " << progress << "%.";
+            }
             last_progress = progress;
         }
     }
 
-    qDebug() << "Завершил проверку основной программы.";
+    if (arguments.english){
+        qDebug() << "Completed verifying the main program.";
+    }
+    else{
+        qDebug() << "Завершил проверку основной программы.";
+    }
     return true;
 }
 
 bool Programmer::flashProgram_run()
 {
-    qDebug() << "Начал запуск основной программы.";
+    if (arguments.english){
+        qDebug() << "Started running the main program.";
+    }
+    else{
+        qDebug() << "Начал запуск основной программы.";
+    }
 
     uart.writeRead(QByteArray(1, 'R'), 1);
 
     if	(!uart.getByte('R')){
-        qDebug() << "Ошибка при запуске основной программы!";
+        if (arguments.english){
+            qDebug() << "Error when starting the main program!";
+        }
+        else{
+            qDebug() << "Ошибка при запуске основной программы!";
+        }
         uart.end();
         return false;
     }
 
-    qDebug() << "Завершил запуск основной программы.";
+    if (arguments.english){
+        qDebug() << "Finished running the main program.";
+    }
+    else{
+        qDebug() << "Завершил запуск основной программы.";
+    }
     return true;
 }
 

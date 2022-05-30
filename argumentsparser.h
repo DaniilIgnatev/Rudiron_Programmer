@@ -14,6 +14,10 @@ private:
   QCommandLineParser parser;
 
 public:
+  const QString englishOption_name = "english";
+
+  const QString printArgumentsOption_name = "print_arguments";
+
   const QString keepOpen_name = "keep_open";
 
   const QString portNameOption_name = "port";

@@ -33,9 +33,8 @@ int main(int argc, char *argv[])
     QCoreApplication a(argc, argv);
 #endif
 
-
     QCoreApplication::setApplicationName("Rudiron UART programmer");
-    QCoreApplication::setApplicationVersion("1.0");
+    QCoreApplication::setApplicationVersion("1.1.0");
 
     ArgumentsParser parser;
     ProgrammerArguments arguments = parser.processProgrammerArguments(a);
@@ -44,6 +43,12 @@ int main(int argc, char *argv[])
     int start_code = programmer->start() ? 0 : 1;
 
     if (arguments.keepOpen){
+        if (arguments.english){
+            qDebug() << "Press Ctrl+C to close the program...";
+        }
+        else{
+            qDebug() << "Нажмите Ctrl+C, чтобы закрыть программу...";
+        }
         return a.exec();
     }
     else{
