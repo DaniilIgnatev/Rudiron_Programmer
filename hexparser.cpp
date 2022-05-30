@@ -31,8 +31,7 @@ BOOL HEXParser::GetDataHex(void)
     btype_hex = GetHexByte(7);
     ks = bl_hex + btype_hex + (wadr_offs_hex >> 8) + wadr_offs_hex;
 
-    for (i = 0; i < bl_hex + 1; i++)
-    {
+    for (i = 0; i < bl_hex + 1; i++){
         buf_data_hex[i] = GetHexByte(2 * i + 9);
         ks += buf_data_hex[i];
     }

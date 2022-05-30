@@ -17,8 +17,8 @@ int main(int argc, char *argv[])
 //    argv2[2] = (char*)"/Users/daniilignatev/Yandex.Disk.localized/Documents/Rudiron/Distributive/components/win_x64/RudironDistributive/tools/UART programmer/1986UARTWSD/RudironDiagnostics.hex";
     argv2[2] = (char*)"C:/Users/daniil/YandexDisk/Documents/Rudiron/Distributive/components/win_x64/RudironDistributive/tools/UART programmer/1986UARTWSD/RudironDiagnostics.hex";
     argv2[3] = (char*)"keep_open";
-    argv2[4] = (char*)"--verify_bootloader";
-    argv2[5] = (char*)"--erase";
+    argv2[4] = (char*)"verify_bootloader";
+    argv2[5] = (char*)"erase";
     argv2[6] = (char*)"--load";
     argv2[7] = (char*)"verify_program";
     argv2[8] = (char*)"--run";
