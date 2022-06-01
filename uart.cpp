@@ -21,11 +21,6 @@ int UART::getByte(int at)
     }
 }
 
-int UART::count()
-{
-    return this->rx_buffer_index;
-}
-
 bool UART::begin(QSerialPortInfo port)
 {
     serial = new QSerialPort(port, this);

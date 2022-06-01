@@ -21,12 +21,16 @@ private:
     ///Индекс последнего свободного байта в буфере приема
     unsigned char rx_buffer_index = 0;
 
+    int readByte();
+
+    int popByte();
+
+    int getEventLoopDelay();
+
 public:
     explicit UART(QObject *parent = nullptr);
 
     int getByte(int at);
-
-    int count();
 
     bool begin(QSerialPortInfo port);
 
@@ -34,19 +38,12 @@ public:
 
     void setBaudRate(qint32 rate);
 
-    int getEventLoopDelay();
-
     void writeSync();
 
     void writeRead(QByteArray buffer, int readBytes);
 
-    int readByte();
-
-    int popByte();
-
     void waitRead(int timeout = 100);
 
-    ///Очищает буфер приема
     void clearRXBuffer();
 
 signals:
