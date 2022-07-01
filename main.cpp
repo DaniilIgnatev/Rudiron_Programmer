@@ -33,7 +33,7 @@ int main(int argc, char *argv[])
     QCoreApplication a(argc, argv);
 #endif
 
-    QCoreApplication::setApplicationName("Rudiron UART programmer");
+    QCoreApplication::setApplicationName("Rudiron programmer");
     QCoreApplication::setApplicationVersion("1.1.0");
 
     ArgumentsParser parser;
