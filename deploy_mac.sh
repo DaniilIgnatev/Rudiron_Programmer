@@ -21,7 +21,7 @@ cd $root_dir
 
 rm -r release
 mkdir release
-cp -r "${root_dir}/../build-${target}-Desktop_Qt_${qt_version}_clang_64bit-Release/${target}.app" "release/${target_user}.app"
+cp -r "${root_dir}/../build-${target_user}-Desktop_Qt_${qt_version}_clang_64bit-Release/${target_user}.app" "release/${target_user}.app"
 cd ${compiler_bin}
 ./macdeployqt "${root_dir}/release/${target_user}.app" -dmg
 # $SHELL
