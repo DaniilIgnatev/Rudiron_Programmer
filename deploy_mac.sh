@@ -15,7 +15,7 @@ echo "target = $target"
 target_user="$(echo "$target" | tr '_' ' ')"
 echo "target_user = $target_user"
 
-root_dir="/Users/daniilignatev/GitHub/$target"
+root_dir=$( dirname -- "$0"; )
 echo "root_dir = ${root_dir}"
 cd $root_dir
 
