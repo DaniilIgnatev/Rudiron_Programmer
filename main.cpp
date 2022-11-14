@@ -12,8 +12,8 @@ int main(int argc, char *argv[])
     int argc2 = 11;
     char** argv2 = new char*[argc2];
     argv2[0] = (char*)"C:/Users/daniil/Documents/GitHub/build-RudironProgrammer-Qt_5_12_10_msvc2017_64-Debug/debug/RudironProgrammer.exe";
-    argv2[1] = (char*)"/Users/daniilignatev/GitHub/Rudiron_Diagnostics/1986_BOOT_UART.hex";
-    argv2[2] = (char*)"/Users/daniilignatev/GitHub/Rudiron_Diagnostics/RudironDiagnostics.hex";
+    argv2[1] = (char*)"C:/Users/folke/OneDrive/Documents/GitHub/Rudiron_Verification/1986_BOOT_UART.hex";
+    argv2[2] = (char*)"C:/Users/folke/OneDrive/Documents/GitHub/Rudiron_Verification/RudironDiagnostics.hex";
     argv2[3] = (char*)"keep_open";
     argv2[4] = (char*)"--verify_bootloader";
     argv2[5] = (char*)"--erase";
@@ -29,7 +29,7 @@ int main(int argc, char *argv[])
 #endif
 
     QCoreApplication::setApplicationName("Rudiron programmer");
-    QCoreApplication::setApplicationVersion("1.1.0");
+    QCoreApplication::setApplicationVersion("1.1.1");
 
     ArgumentsParser parser;
     ProgrammerArguments arguments = parser.processProgrammerArguments(a);

@@ -33,7 +33,11 @@ struct ProgrammerArguments{
 
     QString programPath;
 
-    int speedMultiplier = 1;
+    int speedMultiplier = 0;
+
+    bool hasSpeedMultiplier(){
+        return speedMultiplier != 0;
+    }
 
     QString portName;
 

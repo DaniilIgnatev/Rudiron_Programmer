@@ -33,7 +33,7 @@ Programmer::Programmer(ProgrammerArguments arguments, QObject *parent)
         initialized = false;
     }
 
-    if (!((arguments.speedMultiplier % 2 == 0 || arguments.speedMultiplier == 1) && (arguments.speedMultiplier >= 1 && arguments.speedMultiplier <= 16))){
+    if (!((arguments.speedMultiplier % 2 == 0 || arguments.speedMultiplier == 1) && (arguments.speedMultiplier >= 0 && arguments.speedMultiplier <= 16))){
         if (arguments.english){
             qDebug() << "Wrong speed multiplier value: " << arguments.speedMultiplier;
         }
@@ -61,12 +61,13 @@ bool Programmer::start()
     if (!open()){
         return false;
     }
-
     if (!flashBootloader_sync()){
         return false;
     }
-    if (!flashBootloader_switchSpeed()){
-        return false;
+    if (arguments.hasSpeedMultiplier()){
+        if (!flashBootloader_switchSpeed()){
+            return false;
+        }
     }
     if (!flashBootloader_load()){
         return false;
@@ -82,7 +83,6 @@ bool Programmer::start()
     if (!flashBootloader_identify()){
         return false;
     }
-
     if (arguments.options.checked(ProgrammerOptionsEnum::Erase)){
         if (!flashProgram_erase()){
             return false;

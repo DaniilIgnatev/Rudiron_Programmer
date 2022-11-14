@@ -9,7 +9,7 @@
 class UART : public QObject
 {
     Q_OBJECT
-private:
+    public:
     int read_delay = 1;
 
     QSerialPort* serial = nullptr;
