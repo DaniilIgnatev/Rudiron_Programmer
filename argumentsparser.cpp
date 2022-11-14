@@ -2,62 +2,52 @@
 
 ArgumentsParser::ArgumentsParser()
 {
-    parser.setApplicationDescription("Утилита программирования Rudiron плат через COM порт.");
+    parser.setApplicationDescription("Rudiron board programming utility via COM port. Утилита программирования Rudiron плат через COM порт.");
     parser.addHelpOption();
     parser.addVersionOption();
 
-    parser.addPositionalArgument("bootloader", "Полный путь до загрузчика.");
-    parser.addPositionalArgument("program", "Полный путь до загружаемой программы пользователя.");
+    parser.addPositionalArgument("bootloader_path", "Full path to the bootloader. Полный путь до загрузчика.");
+    parser.addPositionalArgument("program_path", "Full path to the downloaded user program. Полный путь до загружаемой программы пользователя.");
 
-    ////Язык вывода сообщений - английский
     QCommandLineOption englishOption(englishOption_name,
-                                   "Устанавливает язык вывода - английский.");
+                                   "Sets the output language to English. Устанавливает язык вывода - английский.");
     parser.addOption(englishOption);
 
-    ////Вывод аргументов в консоль
     QCommandLineOption printArgumentsOption(printArgumentsOption_name,
-                                   "Выводит аргументы программы в консоль.");
+                                   "Outputs program arguments to the console. Выводит аргументы программы в консоль.");
     parser.addOption(printArgumentsOption);
 
-    ///Ожидает нажатия клавиши для закрытия
     QCommandLineOption keepOpenOption(keepOpen_name,
-                                   "Ожидает нажатие клавиши перед завершением.");
+                                   "Waits for the key to be pressed before completing. Ожидает нажатие клавиши перед завершением.");
     parser.addOption(keepOpenOption);
 
-    ///Опция верификации загрузчика
     QCommandLineOption verifyBootloaderOption(verifyBootloaderOption_name,
-                                   "Проверка загрузчика.");
+                                   "Checking the boot loader. Проверка загрузчика.");
     parser.addOption(verifyBootloaderOption);
 
-    ///Опция полной очистки ПЗУ
     QCommandLineOption eraseOption(eraseOption_name,
-                                   "Полная очистка памяти.");
+                                   "Full memory cleanup. Полная очистка памяти.");
     parser.addOption(eraseOption);
 
-    ///Опция загрузки программы пользователя в ПЗУ
     QCommandLineOption loadOption(loadOption_name,
-                                  "Загрузка программы пользователя.");
+                                  "Loading the user program. Загрузка программы пользователя.");
     parser.addOption(loadOption);
 
-    ///Опция полной проверки загруженной в ПЗУ программы пользователя
     QCommandLineOption verifyProgramOption(verifyProgramOption_name,
-                                  "Проверка программы пользователя.");
+                                  "Checking the user program. Проверка программы пользователя.");
     parser.addOption(verifyProgramOption);
 
-    ///Опция запуска программы пользователя из ПЗУ
     QCommandLineOption runOption(runOption_name,
-                                  "Запуск программы пользователя.");
+                                  "Running a user program. Запуск программы пользователя.");
     parser.addOption(runOption);
 
-    ///Принудительно задает имя COM-порта.
     QCommandLineOption portNameOption(portNameOption_name,
-                                  "Установить имя последовательного порта <name>.",
+                                  "Set serial port name <name>. Установить имя последовательного порта <name>.",
                                   "<name>");
     parser.addOption(portNameOption);
 
-    ///Опция установки скорости обмена с бутлодером (baud rate)
     QCommandLineOption speedMultiplierOption(speedMultiplierOption_name,
-                                  "Установить умножитель скорости обмена <multiplier>. Возможные значения: 1 (14400), 2 (28800), 4 (57600), 8 (115200), 16 (230400)",
+                                  "Set the exchange rate multiplier <multiplier>. Possible values: 0(default speed), 1 (14400), 2 (28800), 4 (57600), 8 (115200), 16 (230400). Установить умножитель скорости обмена <multiplier>. Возможные значения: 0(скорость по умолчанию), 1 (14400), 2 (28800), 4 (57600), 8 (115200), 16 (230400).",
                                   "<multiplier>");
     parser.addOption(speedMultiplierOption);
 }
@@ -71,13 +61,7 @@ ProgrammerArguments ArgumentsParser::processProgrammerArguments(QCoreApplication
 
     const QStringList pos_args = parser.positionalArguments();
     if (pos_args.count() < 2){
-        if (arguments.english){
-            qDebug() << "Need at least 2 arguments: bootloader and user-program paths!";
-        }
-        else{
-            qDebug() << "Необходимо как минимум указать путь до загрузчика и программы пользователя!";
-        }
-
+        qDebug() << "Need at least 2 arguments: bootloader and user-program paths! Необходимо указать пути до загрузчика и программы пользователя!";
         return arguments;
     }
 

@@ -64,6 +64,7 @@ bool Programmer::start()
     if (!flashBootloader_sync()){
         return false;
     }
+
     if (arguments.hasSpeedMultiplier()){
         if (!flashBootloader_switchSpeed()){
             return false;
