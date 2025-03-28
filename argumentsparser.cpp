@@ -2,52 +2,52 @@
 
 ArgumentsParser::ArgumentsParser()
 {
-    parser.setApplicationDescription("Rudiron board programming utility via COM port. Утилита программирования Rudiron плат через COM порт.");
+    parser.setApplicationDescription("(EN) Rudiron COM port flash tool.\n(RU) Утилита программирования Rudiron через COM порт.");
     parser.addHelpOption();
     parser.addVersionOption();
 
-    parser.addPositionalArgument("bootloader_path", "Full path to the bootloader. Полный путь до загрузчика.");
-    parser.addPositionalArgument("program_path", "Full path to the downloaded user program. Полный путь до загружаемой программы пользователя.");
+    parser.addPositionalArgument("bootloader_path", "(EN) Full path to the bootloader hex file.\n(RU) Полный путь до hex файла загрузчика.");
+    parser.addPositionalArgument("program_path", "(EN) Full path to the flashed program hex file.\n(RU) Полный путь до прошиваемой программы.");
 
     QCommandLineOption englishOption(englishOption_name,
-                                   "Sets the output language to English. Устанавливает язык вывода - английский.");
+                                   "(EN) Set the output language to English.\n(RU) Установить язык вывода - английский.");
     parser.addOption(englishOption);
 
     QCommandLineOption printArgumentsOption(printArgumentsOption_name,
-                                   "Outputs program arguments to the console. Выводит аргументы программы в консоль.");
+                                   "(EN) Print program's start arguments to the terminal.\n(RU) Печать аргументов запуска программы в терминал.");
     parser.addOption(printArgumentsOption);
 
     QCommandLineOption keepOpenOption(keepOpen_name,
-                                   "Waits for the key to be pressed before completing. Ожидает нажатие клавиши перед завершением.");
+                                   "(EN) Wait for the Ctrl+C before the exit.\n(RU) Ожидать нажатия сочетания клавиш Ctrl+C для завершения работы.");
     parser.addOption(keepOpenOption);
 
     QCommandLineOption verifyBootloaderOption(verifyBootloaderOption_name,
-                                   "Checking the boot loader. Проверка загрузчика.");
+                                   "(EN) Verify the correctness of flashed boot loader.\n(RU) Проверка корректности записи загрузчика в оперативную память.");
     parser.addOption(verifyBootloaderOption);
 
     QCommandLineOption eraseOption(eraseOption_name,
-                                   "Full memory cleanup. Полная очистка памяти.");
+                                   "(EN) Clean the whole flash memory.\n(RU) Произвести полную очистку флеш-памяти.");
     parser.addOption(eraseOption);
 
     QCommandLineOption loadOption(loadOption_name,
-                                  "Loading the user program. Загрузка программы пользователя.");
+                                  "(EN) Flash the user program.\n(RU) Прошить пользовательскую программу в флеш-память.");
     parser.addOption(loadOption);
 
     QCommandLineOption verifyProgramOption(verifyProgramOption_name,
-                                  "Checking the user program. Проверка программы пользователя.");
+                                  "(EN) Verify the correctness of flashed user program.\n(RU) Проверка корректности записи пользовательской программы во флеш-память.");
     parser.addOption(verifyProgramOption);
 
     QCommandLineOption runOption(runOption_name,
-                                  "Running a user program. Запуск программы пользователя.");
+                                  "(EN) Run the flashed user program.\n(RU) Запуск прошитой во флеш-память программы.");
     parser.addOption(runOption);
 
     QCommandLineOption portNameOption(portNameOption_name,
-                                  "Set serial port name <name>. Установить имя последовательного порта <name>.",
+                                  "(EN) Set serial port name <name>.\n(RU) Задать имя последовательного порта <name>.",
                                   "<name>");
     parser.addOption(portNameOption);
 
     QCommandLineOption speedMultiplierOption(speedMultiplierOption_name,
-                                  "Set the exchange rate multiplier <multiplier>. Possible values: 0(default speed), 1 (14400), 2 (28800), 4 (57600), 8 (115200), 16 (230400). Установить умножитель скорости обмена <multiplier>. Возможные значения: 0(скорость по умолчанию), 1 (14400), 2 (28800), 4 (57600), 8 (115200), 16 (230400).",
+                                  "(EN) Set the exchange rate multiplier <multiplier>. Possible values: 0 (default value), 1 (14400 baud/s), 2 (28800 baud/s), 4 (57600 baud/s), 8 (115200 baud/s), 16 (230400 baud/s).\n(RU) Установить умножитель скорости обмена <multiplier>. Возможные значения: 0 (по умолчанию), 1 (14400 baud/s), 2 (28800 baud/s), 4 (57600 baud/s), 8 (115200 baud/s), 16 (230400 baud/s).",
                                   "<multiplier>");
     parser.addOption(speedMultiplierOption);
 }
@@ -61,7 +61,7 @@ ProgrammerArguments ArgumentsParser::processProgrammerArguments(QCoreApplication
 
     const QStringList pos_args = parser.positionalArguments();
     if (pos_args.count() < 2){
-        qDebug() << "Need at least 2 arguments: bootloader and user-program paths! Необходимо указать пути до загрузчика и программы пользователя!";
+        qDebug() << "(EN) This tool requires 2 arguments to run: a full path to bootloader hex file and a full path to flashed program hex file. For example: ./\"Rudiron Programmer\" \"1986_BOOT_UART.hex\" \"RudironDiagnostics.hex\".\n(RU) Для запуска утилиты обязательно нужно передать 2 аргумента: полный путь до hex файла загрузчика и полный путь до hex файла прошиваемой пользовательской программы. Например: For example: ./\"Rudiron Programmer\" \"1986_BOOT_UART.hex\" \"RudironDiagnostics.hex\".";
         return arguments;
     }
 

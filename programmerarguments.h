@@ -42,6 +42,10 @@ struct ProgrammerArguments{
     QString portName;
 
     ProgrammerOptions options;
+
+    bool correct(){
+        return !this->bootloaderPath.isEmpty() && !this->programPath.isEmpty();
+    }
 };
 
 #endif // PROGRAMMERARGUMENTS_H

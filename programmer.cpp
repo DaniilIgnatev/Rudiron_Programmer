@@ -36,9 +36,11 @@ Programmer::Programmer(ProgrammerArguments arguments, QObject *parent)
     if (!((arguments.speedMultiplier % 2 == 0 || arguments.speedMultiplier == 1) && (arguments.speedMultiplier >= 0 && arguments.speedMultiplier <= 16))){
         if (arguments.english){
             qDebug() << "Wrong speed multiplier value: " << arguments.speedMultiplier;
+            qDebug() << "Supported values are: 0,1,2,4,8,16";
         }
         else{
              qDebug() << "Некорректное значение умножителя частоты обмена: " << arguments.speedMultiplier;
+             qDebug() << "Поддерживаемые значения: 0,1,2,4,8,16";
         }
         initialized = false;
     }
